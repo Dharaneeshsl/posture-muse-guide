@@ -7,13 +7,6 @@
 ### **Master the Pose. Pose Yourself.**
 *Next-generation, real-time AI yoga posture coach powered by on-device computer vision and natural voice guidance.*
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-18.3-61DAFB?logo=react&logoColor=black)](https://react.dev/)
-[![Vite](https://img.shields.io/badge/Vite-7.3-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
-[![MediaPipe](https://img.shields.io/badge/Google_MediaPipe-Tasks_Vision-FF6F00?logo=google&logoColor=white)](https://developers.google.com/mediapipe)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-
 </div>
 
 ---
@@ -22,22 +15,22 @@
 
 **Pose Perfect** is an intelligent, privacy-first computer vision web application that transforms any webcam into a personal yoga instructor. Built with Google's **MediaPipe Pose Landmarker**, Pose Perfect tracks 33 3D skeletal landmarks in real time, computes anatomical joint angles, and delivers instant, spoken feedback alongside precision visual guidance.
 
-All computer vision inference runs **100% locally in your browser** — no camera streams, images, or personal video data are ever uploaded to an external server.
+All computer vision inference runs **100% locally in your browser** — no camera streams, images, or personal video data are ever uploaded to any external server or cloud service.
 
 ---
 
 ## ✨ Key Features
 
 ### 👁️ Real-Time On-Device Computer Vision
-- **33 3D Landmark Tracking**: Continuous full-body skeletal detection using MediaPipe BlazePose.
-- **Biomechanical Joint Analysis**: Live angular calculation across critical joints (knees, hips, elbows, shoulders, ankles, spine).
-- **Hardware-Adaptive Inference**: Automatic GPU acceleration (WebGL/WebGPU) with seamless CPU fallback for low-power devices.
-- **Zero Privacy Risk**: Complete client-side processing keeps your camera feed confidential.
+- **33 3D Landmark Tracking**: Continuous full-body skeletal detection using Google MediaPipe BlazePose (`pose_landmarker_full.task`).
+- **Biomechanical Joint Analysis**: Live angular calculations across critical joints (knees, hips, elbows, shoulders, ankles, spine).
+- **Hardware-Adaptive Inference**: Automatic GPU acceleration (WebGL/WebGPU) with seamless fallback to CPU for lower-powered devices.
+- **100% Client-Side Privacy**: Zero network streaming of camera feeds; complete local processing via WebAssembly.
 
-### 🎙️ Spoken Voice Coach & Motivation
-- **Natural Voice Corrections**: Real-time voice cues via the browser-native Web Speech API instructing you on adjustments (e.g. *"Straighten your left knee"*, *"Raise your arms higher"*).
-- **Mid-Hold Motivational Boosts**: Dynamic encouragement during holds (*"Keep going, you can do it!"*, *"Stay hard!"*, *"Breathe deeply and hold strong"*).
-- **Smart Speech Throttling**: Intelligent cooldown intervals prevent audio overlap and maintain a calm, focused practice.
+### 🎙️ Spoken Voice Coach & Motivational Feedback
+- **Natural Voice Corrections**: Real-time voice cues via the browser-native Web Speech API (`SpeechSynthesis`) instructing you on posture adjustments (e.g., *"Straighten your left knee"*, *"Raise your arms higher"*).
+- **Mid-Hold Motivational Boosts**: Dynamic encouragement during holds (*"Keep going, you can do it!"*, *"Stay strong!"*, *"Breathe deeply and hold steady"*).
+- **Smart Speech Throttling**: Intelligent cooldown intervals prevent overlapping audio cues and maintain a calm practice flow.
 - **Ambient Soundscapes**: Built-in soothing meditation background music during posture holds.
 
 ### 📊 Precision Multi-Metric Scoring Engine
@@ -48,33 +41,39 @@ Every session computes a multi-dimensional assessment:
 - **Overall Grade**: Dynamically scaled performance ratings (*Pose Master*, *Flowing Smoothly*, *Steady & Centered*, *Getting Stronger*).
 
 ### 🏆 Gamified Challenge & Practice Modes
-- **5-Level Progressive Challenge**: Progress from beginner to advanced postures with live countdowns, timed holds, and animated completion celebrations.
-- **Explore Poses Library**: Free-practice mode with 10+ curated yoga postures (Warrior I & II, Tree Pose, Triangle Pose, Downward Dog, Cobra, Plank, Bridge, Child's Pose, etc.).
-- **Health Benefits & Alignment Tips**: Detailed breakdown of physical and mental benefits associated with each posture.
+- **5-Level Progressive Challenge**: Complete sequential pose challenges with timed holds, countdowns, and celebration animations:
+  1. **Level 1**: Tree Pose (*Vrksāsana*) — Beginner balance
+  2. **Level 2**: Warrior II (*Virabhadrāsana II*) — Intermediate strength & hip opening
+  3. **Level 3**: Plank Pose (*Phalakāsana*) — Core stability
+  4. **Level 4**: Triangle Pose (*Trikonāsana*) — Lateral spine & hamstring flexibility
+  5. **Level 5**: Downward-Facing Dog (*Adho Mukha Śvānāsana*) — Full-body integration
+- **Explore Poses Library**: Free-practice mode with 10+ curated postures (including Chair Pose, Warrior I, Cobra Pose, Child's Pose, and Bridge Pose).
+- **Health Benefits & Alignment Tips**: Detailed breakdown of anatomical and mental benefits for every posture.
 
 ### 📄 One-Click Results & Report Export
-- **Downloadable Performance Summary**: Export detailed session analytics and level breakdown reports in JPG/PDF format.
-- **CORS-Safe Offline Architecture**: Resilient rendering engine that guarantees exports even without external asset connectivity.
+- **Session Performance Summary**: Interactive visual scorecards showing overall percentage, stability, symmetry, and per-level performance.
+- **Export to PDF & PNG**: Download your personalized yoga report card using HTML5 Canvas and jsPDF with zero cloud dependencies.
+- **CORS-Resilient Rendering**: Gracefully handles remote thumbnails with offline fallbacks.
 
-### 🎨 Top-Tier Visual Aesthetics
-- **Luminous Cosmic Aurora Theme**: High-contrast dark glassmorphic UI with vibrant emerald, jade, and golden accents.
-- **Fluid Micro-Interactions**: Smooth 60 FPS transitions powered by **Framer Motion**.
+### 🎨 Cosmic Aurora Design System
+- **Dark Glassmorphic UI**: High-contrast, elegant aesthetic with emerald, jade, and golden accents.
+- **Fluid Micro-Interactions**: Silky 60 FPS state transitions powered by **Framer Motion**.
 - **Responsive Layout**: Designed for seamless practice across laptops, desktops, and tablets.
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer | Technology |
-|---|---|
-| **Frontend Framework** | [React 18](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) |
-| **Build Tool** | [Vite](https://vitejs.dev/) |
-| **Vision & ML** | [Google MediaPipe Tasks Vision](https://developers.google.com/mediapipe) (`@mediapipe/tasks-vision`) |
-| **Styling & Design System** | [Tailwind CSS](https://tailwindcss.com/), [Shadcn UI](https://ui.shadcn.com/), [Radix Primitives](https://www.radix-ui.com/) |
-| **Motion & Animation** | [Framer Motion](https://www.framer.com/motion/) |
-| **Audio & Speech** | Browser Web Speech API (`SpeechSynthesis`), HTML5 Audio |
-| **Document Generation** | [jsPDF](https://github.com/parallax/jsPDF), HTML5 Canvas API |
-| **Icons** | [Lucide React](https://lucide.dev/) |
+| Layer | Technology | Description |
+|---|---|---|
+| **Frontend Framework** | React 18 + TypeScript | Modern component architecture with strict typing |
+| **Build Tool & Dev Server** | Vite 7 | Lightning-fast HMR and optimized bundling |
+| **Computer Vision / ML** | Google MediaPipe Tasks Vision | BlazePose 33-landmark on-device detection |
+| **Styling & Components** | Tailwind CSS + Shadcn UI + Radix Primitives | Accessible, themeable UI components |
+| **Motion & Animation** | Framer Motion 12 | Physics-based animations and screen transitions |
+| **Audio & Speech** | Web Speech API + HTML5 Audio | Client-side speech synthesis and ambient sound |
+| **Document Export** | jsPDF + HTML5 Canvas API | Client-side PDF and image report generator |
+| **Icons** | Lucide React | Clean, lightweight SVG icons |
 
 ---
 
@@ -86,30 +85,34 @@ posture-muse-guide/
 │   ├── 1000130175-Picsart-AiImageEnhancer.png  # Application Banner & Logo
 │   ├── meditation-relax-yoga-music.mp3         # Background Meditation Track
 │   ├── placeholder.svg                         # Offline Image Fallback
-│   ├── poses.json                              # Pose Library & Biomechanical Targets
+│   ├── poses.json                              # 10 Poses + 5-Level Challenge Config
 │   └── robots.txt
 ├── src/
 │   ├── components/
-│   │   ├── ui/                                 # Radix UI + Tailwind Primitives
+│   │   ├── ui/                                 # 30+ Radix UI & Tailwind Components
 │   │   ├── BenefitsCard.tsx                    # Anatomical & Wellness Benefits
-│   │   ├── CameraView.tsx                      # Webcam Stream & MediaPipe Overlay
-│   │   ├── ChallengeFlow.tsx                   # Challenge State Machine & Voice Coach
-│   │   ├── FinalSummary.tsx                    # Multi-Level Report & Analytics
-│   │   ├── LevelCompleteOverlay.tsx            # Celebration & Progress Modal
-│   │   ├── PoseCard.tsx                        # Pose Library Card Component
+│   │   ├── CameraView.tsx                      # Webcam Feed, MediaPipe & Skeleton Canvas
+│   │   ├── ChallengeFlow.tsx                   # Challenge State Machine, Hold Timer & Voice Coach
+│   │   ├── FinalSummary.tsx                    # Challenge Completion Analytics & PDF Export
+│   │   ├── LevelCompleteOverlay.tsx            # Level Pass Modal & Animations
+│   │   ├── NavLink.tsx                         # Navigation Link Component
+│   │   ├── PoseCard.tsx                        # Pose Grid Item for Library Mode
 │   │   └── SessionSummary.tsx                  # Post-Level Score Breakdown
+│   ├── hooks/
+│   │   ├── use-mobile.tsx                      # Viewport & Device Detection
+│   │   └── use-toast.ts                        # Toast Notification Hook
 │   ├── lib/
 │   │   ├── reportGenerator.ts                  # Canvas & PDF Report Builder
-│   │   └── utils.ts                            # Class Merging Utilities
+│   │   └── utils.ts                            # Class Merging & Formatting Utilities
 │   ├── pages/
-│   │   ├── Index.tsx                           # Landing & Main App Router
+│   │   ├── Index.tsx                           # Landing, Library & Challenge Router
 │   │   └── NotFound.tsx                        # 404 Route Handler
 │   ├── utils/
-│   │   ├── angles.ts                           # Biomechanical 3D Angle Calculations
-│   │   └── scoring.ts                          # Angular Distance & Stability Scoring
-│   ├── App.tsx                                 # App Root & Providers
-│   ├── index.css                               # Cosmic Aurora Design System
-│   └── main.tsx                                # Entrypoint
+│   │   ├── angles.ts                           # 3D Vector Math & Anatomical Joint Angle Calculations
+│   │   └── scoring.ts                          # Tolerance-Weighted Scoring, Stability & Symmetry
+│   ├── App.tsx                                 # App Root & Providers (QueryClient, Toaster)
+│   ├── index.css                               # Cosmic Aurora Theme & Tailwind Base
+│   └── main.tsx                                # React DOM Entrypoint
 ├── package.json
 ├── tailwind.config.ts
 ├── tsconfig.json
@@ -121,64 +124,97 @@ posture-muse-guide/
 ## 🚀 Getting Started
 
 ### Prerequisites
-- [Node.js](https://nodejs.org/) (v18.0.0 or higher recommended)
-- [npm](https://www.npmjs.com/) (v9.0.0 or higher)
-- A webcam-enabled device (laptop, desktop with USB camera, or tablet)
 
-### Installation
+Ensure you have the following installed:
+- Node.js (v18.0.0 or higher; tested on v24.x)
+- npm (v9.0.0 or higher) or Bun
+- A working webcam (built-in or USB external)
+- A modern web browser supporting WebGL and Web Speech API (Google Chrome, Microsoft Edge, Brave, or Firefox)
 
-1. **Clone the Repository**:
+### Installation & Running
+
+1. **Clone the repository**:
    ```bash
    git clone https://github.com/Dharaneeshsl/posture-muse-guide.git
    cd posture-muse-guide
    ```
 
-2. **Install Dependencies**:
+2. **Install dependencies**:
    ```bash
    npm install
    ```
 
-3. **Start the Development Server**:
+3. **Start the development server**:
    ```bash
    npm run dev
    ```
-   Open your browser and navigate to `http://localhost:8080` (or the port specified in terminal).
 
-4. **Build for Production**:
-   ```bash
-   npm run build
-   ```
-
-5. **Run Linter & Type Check**:
-   ```bash
-   npm run lint
-   npx tsc --noEmit
-   ```
+4. **Open in browser**:
+   Navigate to `http://localhost:8080` in your web browser (or the URL displayed in your terminal).
 
 ---
 
-## 💡 How to Use
+## 💻 Available Scripts
 
-1. **Launch the App**: Open the web application and click **"Start Challenge"** or **"Explore Poses"**.
-2. **Grant Camera Access**: When prompted by your browser, grant camera permissions.
-3. **Position Your Body**: Stand approximately **6–8 feet** away from your webcam so your full body (head to feet) is visible in the frame.
+| Script | Command | Purpose |
+|---|---|---|
+| **Development** | `npm run dev` | Runs the Vite development server on port 8080 with HMR |
+| **Production Build** | `npm run build` | Compiles TypeScript and creates optimized `/dist` bundle |
+| **Preview Build** | `npm run preview` | Starts a local web server to preview production build |
+| **Lint** | `npm run lint` | Runs ESLint across all files |
+| **Type Check** | `npx tsc --noEmit` | Validates TypeScript types across the project |
+
+---
+
+## 💡 How to Practice
+
+1. **Launch**: Click **"Start Challenge"** to embark on the 5-level journey or **"Explore Poses"** to practice individual poses.
+2. **Grant Camera Permissions**: Click "Allow" when the browser requests webcam access.
+3. **Position Your Body**:
+   - Stand approximately **6–8 feet (2–2.5 meters)** away from your webcam.
+   - Ensure your whole body from head to feet is inside the frame.
+   - Adequate, even room lighting helps tracking precision.
 4. **Follow the Cues**:
-   - The system displays a 3-second countdown before the hold begins.
-   - Match the green skeleton overlay to the target pose.
-   - Listen to spoken feedback to fine-tune your angles.
-   - Hold steadily until the progress ring completes 100%.
-5. **Review Your Report**: After finishing, inspect your performance breakdown and download your personalized report card.
+   - Get into position during the 3-second preparation countdown.
+   - Align your body with the live target posture.
+   - Listen to real-time audio guidance to adjust your elbows, knees, or hips.
+   - Hold steadily until the progress ring reaches 100%.
+5. **Get Your Report**:
+   - Review your Accuracy, Stability, and Symmetry scores.
+   - Export your official session scorecard as a PDF or image.
+
+---
+
+## 🧮 Biomechanical Scoring Mechanics
+
+The scoring engine evaluates posture accuracy in three dimensions:
+
+$$\text{Total Score} = w_{\text{acc}} \cdot \text{Accuracy} + w_{\text{stab}} \cdot \text{Stability} + w_{\text{sym}} \cdot \text{Symmetry}$$
+
+1. **Angular Accuracy**: Compares computed 3D vector joint angles (left/right knee, hip, shoulder, elbow) against ideal reference angles defined in `poses.json`. Each joint's error is normalized against its configured tolerance window:
+   $$\text{Error} = \max\left(0, \frac{|\theta_{\text{actual}} - \theta_{\text{target}}| - \text{Tolerance}}{\text{Tolerance}}\right)$$
+2. **Hold Stability**: Measures frame-to-frame angular variance over the holding window. Lower jitter yields higher stability scores.
+3. **Bilateral Symmetry**: Measures balance between contralateral joint pairs (e.g., left vs. right hip and shoulder leveling).
 
 ---
 
 ## 🔒 Privacy & Security
 
-- **Zero Cloud Transmission**: All MediaPipe landmark detection is computed locally via WebAssembly on your device.
-- **No Video Recording**: Your webcam stream is never recorded, saved, or uploaded.
-- **Open Standards**: Built entirely on standard browser APIs (WebRTC, Canvas, Web Speech API).
+- **100% Client-Side Inference**: Google MediaPipe executes directly inside your browser via WebAssembly and WebGL.
+- **No Video Recording or Uploads**: Video frames are analyzed in memory and immediately discarded.
+- **No External Analytics / Tracking**: Your practice remains completely private to you.
+
+---
+
+## 🛠️ Troubleshooting
+
+- **Camera Not Loading**: Ensure camera permissions are granted in browser settings (`chrome://settings/content/camera`). Close any other apps using the webcam (e.g., Zoom, Teams).
+- **Laggy Performance / Low FPS**: Ensure Hardware Acceleration is enabled in your browser settings (`Settings > System > Use graphics acceleration when available`).
+- **Voice Feedback Not Playing**: Click anywhere on the webpage to activate browser audio permissions (browsers restrict auto-playing speech until user interaction).
+- **Inference Fallback**: If WebGL/WebGPU is unavailable on your system, the application automatically falls back to CPU inference.
 
 ---
 
 ## 📄 License
 
-This project is licensed under the [MIT License](LICENSE).
+This project is licensed under the MIT License.
