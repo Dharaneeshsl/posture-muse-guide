@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Pose Perfect Banner](./public/1000130175-Picsart-AiImageEnhancer.png)
+<img src="./public/1000130175-Picsart-AiImageEnhancer.png" alt="Pose Perfect Banner" width="360" />
 
 ### **Master the Pose. Pose Yourself.**
 *Next-generation, real-time AI yoga posture coach powered by on-device computer vision and natural voice guidance.*
