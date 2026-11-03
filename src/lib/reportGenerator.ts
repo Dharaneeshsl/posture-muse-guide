@@ -1,8 +1,15 @@
+export interface ReportPoseItem {
+  slug: string;
+  name?: string;
+  thumbnail?: string;
+  [key: string]: unknown;
+}
+
 export async function generateReportCanvas(
   levelScores: number[],
   feedbacks: string[][] | undefined,
   levelDetails: Array<{ level: number; slug: string; name: string; difficulty: string }> | undefined,
-  poseLibrary: Array<any> | undefined,
+  poseLibrary: Array<ReportPoseItem> | undefined,
   totalScore: number
 ): Promise<HTMLCanvasElement | null> {
   const width = 1400;
@@ -27,7 +34,7 @@ export async function generateReportCanvas(
   // Header
   ctx.fillStyle = "#0f172a";
   ctx.font = "700 36px Inter, system-ui, Arial";
-  ctx.fillText("Posture Muse — Challenge Report", padding, padding + 12);
+  ctx.fillText("Pose Perfect — Challenge Report", padding, padding + 12);
 
   // Subheader
   ctx.fillStyle = "#374151";
@@ -41,7 +48,7 @@ export async function generateReportCanvas(
   ctx.fillRect(badgeX, badgeY, 260, 120);
   ctx.fillStyle = "#fff";
   ctx.font = "700 56px Inter, system-ui, Arial";
-  ctx.fillText(`${totalScore}`, badgeX + 26, badgeY + 72);
+  ctx.fillText(`${totalScore}%`, badgeX + 26, badgeY + 72);
   ctx.font = "500 16px Inter, system-ui, Arial";
   ctx.fillText("Total Score", badgeX + 26, badgeY + 98);
 
@@ -52,25 +59,20 @@ export async function generateReportCanvas(
       const details = levelDetails?.[i];
       let thumbUrl: string | undefined;
       if (details && poseLibrary) {
-        const pose = poseLibrary.find((p: any) => p.slug === details.slug);
+        const pose = poseLibrary.find((p) => p.slug === details.slug);
         if (pose && pose.thumbnail) thumbUrl = pose.thumbnail;
       }
 
       if (!thumbUrl) return null;
 
       try {
-        // Try to fetch the image with CORS. If the server doesn't allow CORS, this will fail.
         const resp = await fetch(thumbUrl, { mode: "cors" });
         if (!resp.ok) throw new Error(`Image fetch failed ${resp.status}`);
         const blob = await resp.blob();
-        // createImageBitmap will create a bitmap we can draw on the canvas without crossOrigin issues
         const bitmap = await createImageBitmap(blob);
         return bitmap;
-      } catch (err) {
-        // Fetch failed or CORS blocked; fall back to null so a placeholder is drawn.
-        // Log to console to help debugging in dev.
-        // eslint-disable-next-line no-console
-        console.warn(`Could not load thumbnail for level ${i + 1}:`, thumbUrl, err);
+      } catch {
+        // Fall back to null so placeholder is drawn safely without canvas tainting
         return null;
       }
     })
@@ -88,14 +90,15 @@ export async function generateReportCanvas(
     // Thumbnail
     const imgBitmap = images[i];
     if (imgBitmap) {
-      // draw ImageBitmap
       ctx.drawImage(imgBitmap, padding, y - 16, thumbSize, thumbSize);
-      // close bitmap to free resources where supported
-      try { imgBitmap.close?.(); } catch (e) { /* ignore */ }
+      try { imgBitmap.close?.(); } catch { /* ignore */ }
     } else {
-      // placeholder box
-      ctx.fillStyle = "#f3f4f6";
+      // Placeholder box with pose initials
+      ctx.fillStyle = "#f1f5f9";
       ctx.fillRect(padding, y - 16, thumbSize, thumbSize);
+      ctx.fillStyle = "#64748b";
+      ctx.font = "700 24px Inter, system-ui, Arial";
+      ctx.fillText(name.slice(0, 2).toUpperCase(), padding + 40, y + 54);
     }
 
     // Level text
@@ -108,28 +111,31 @@ export async function generateReportCanvas(
     ctx.fillText(`Difficulty: ${difficulty}`, padding + thumbSize + gap, y + 36);
 
     ctx.fillStyle = "#064e3b";
-    ctx.font = "700 22px Inter, system-ui, Arial";
-    ctx.fillText(score === 0 ? "—" : `${score}/100`, width - padding - 120, y + 26);
+    ctx.font = "700 16px Inter, system-ui, Arial";
+    ctx.fillText(`Score: ${score}%`, padding + thumbSize + gap, y + 62);
 
-    // Tips
-    const tips = (feedbacks?.[i] || []).slice(0, 4);
+    // Feedbacks
+    const fbs = feedbacks?.[i] || [];
     ctx.font = "14px Inter, system-ui, Arial";
-    ctx.fillStyle = "#374151";
-    let tipY = y + 56;
-    for (const t of tips) {
-      // wrap small lines if necessary (simple truncation)
-      const text = t.length > 80 ? t.slice(0, 77) + "…" : t;
-      ctx.fillText(`• ${text}`, padding + thumbSize + gap, tipY);
-      tipY += 20;
+    ctx.fillStyle = "#111827";
+    if (fbs.length === 0) {
+      ctx.fillText("• Great hold! No major adjustments needed.", padding + thumbSize + gap, y + 88);
+    } else {
+      for (let fi = 0; fi < Math.min(fbs.length, 2); fi++) {
+        ctx.fillText(`• ${fbs[fi]}`, padding + thumbSize + gap, y + 88 + fi * 20);
+      }
     }
+
+    // Divider
+    ctx.strokeStyle = "#e5e7eb";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(padding, y + perLevelHeight - 20);
+    ctx.lineTo(width - padding, y + perLevelHeight - 20);
+    ctx.stroke();
 
     y += perLevelHeight;
   }
-
-  // Footer
-  ctx.fillStyle = "#6b7280";
-  ctx.font = "12px Inter, system-ui, Arial";
-  ctx.fillText(`Generated: ${new Date().toLocaleString()}`, padding, height - 20);
 
   return canvas;
 }

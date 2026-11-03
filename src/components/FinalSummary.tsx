@@ -5,14 +5,14 @@ import { Trophy, Home } from "lucide-react";
 import { motion } from "framer-motion";
 import { jsPDF } from "jspdf";
 import { generateReportCanvas } from "@/lib/reportGenerator";
-import BenefitsCard from "./BenefitsCard";
+import BenefitsCard, { PoseBenefitItem } from "./BenefitsCard";
 
 interface FinalSummaryProps {
   levelScores: number[];
   levelFeedbacks?: string[][];
   // Accept level details to show info for each level (name, slug, difficulty, thumbnail, tips)
   levelDetails?: Array<{ level: number; slug: string; name: string; difficulty: string }>;
-  poseLibrary?: Array<any>;
+  poseLibrary?: Array<PoseBenefitItem>;
   onGoHome: () => void;
 }
 
@@ -229,7 +229,7 @@ export function FinalSummary({ levelScores, levelFeedbacks, levelDetails, poseLi
                   variant={score === 0 ? "secondary" : "default"}
                   className="text-2xl px-4 py-2 w-full justify-center"
                 >
-                  {score === 0 ? "—" : score}
+                  {score === 0 ? "—" : `${score}%`}
                 </Badge>
                 {score === 0 && (
                   <div className="text-xs text-muted-foreground">Skipped</div>

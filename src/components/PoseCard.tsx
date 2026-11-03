@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,8 @@ interface PoseCardProps {
 }
 
 export function PoseCard({ name, difficulty, thumbnail, short, onSelect }: PoseCardProps) {
+  const [imgSrc, setImgSrc] = useState(thumbnail);
+
   const getDifficultyColor = (level: string) => {
     switch (level) {
       case "beginner":
@@ -29,8 +32,9 @@ export function PoseCard({ name, difficulty, thumbnail, short, onSelect }: PoseC
     <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group">
       <div className="aspect-[4/3] overflow-hidden">
         <img
-          src={thumbnail}
+          src={imgSrc}
           alt={name}
+          onError={() => setImgSrc("/placeholder.svg")}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
       </div>

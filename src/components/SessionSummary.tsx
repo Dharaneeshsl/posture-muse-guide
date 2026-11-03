@@ -3,13 +3,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, ArrowRight, Trophy } from "lucide-react";
 import { motion } from "framer-motion";
-import BenefitsCard from "./BenefitsCard";
+import BenefitsCard, { PoseBenefitItem } from "./BenefitsCard";
 
 interface SessionSummaryProps {
   poseName: string;
-  // optional: pass pose or poseLibrary if available to show specific benefits
-  pose?: any;
-  poseLibrary?: any[];
+  pose?: PoseBenefitItem;
+  poseLibrary?: PoseBenefitItem[];
   poseSlug?: string;
   level: number;
   accuracy: number;
@@ -47,6 +46,8 @@ export function SessionSummary({
         return "bg-muted text-foreground";
     }
   };
+
+  const calculatedOverall = overallScore ?? Math.round((accuracy + stability + symmetry) / 3);
 
   return (
     <motion.div
@@ -119,8 +120,8 @@ export function SessionSummary({
           <CardTitle>Overall Score</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-5xl font-bold text-accent">{overallScore ?? Math.round((accuracy + stability + symmetry) / 30)} </div>
-          <div className="text-sm text-muted-foreground mt-2">Calculated from accuracy, stability and symmetry</div>
+          <div className="text-5xl font-bold text-accent">{calculatedOverall}%</div>
+          <div className="text-sm text-muted-foreground mt-2">Calculated from accuracy, stability, and symmetry</div>
         </CardContent>
       </Card>
 
@@ -168,22 +169,22 @@ export function SessionSummary({
         {isLastLevel ? (
           <div className="flex gap-3">
             <Button
-              onClick={onNextLevel}
               size="lg"
-              className="gap-2"
+              onClick={onNextLevel}
+              className="text-lg px-8 py-6"
             >
-              <Trophy className="w-5 h-5" />
-              Complete Challenge
+              <Trophy className="w-5 h-5 mr-2" />
+              View Final Summary
             </Button>
           </div>
         ) : (
           <Button
-            onClick={onNextLevel}
             size="lg"
-            className="gap-2"
+            onClick={onNextLevel}
+            className="text-lg px-8 py-6"
           >
             Next Level
-            <ArrowRight className="w-5 h-5" />
+            <ArrowRight className="w-5 h-5 ml-2" />
           </Button>
         )}
       </motion.div>

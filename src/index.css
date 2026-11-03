@@ -2,102 +2,99 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* 
+ * Top 1% Ultra-Luxury Luminous Aesthetic Design System
+ * Vibrant Electric Emerald, Cyber Cyan, and Ultraviolet Aurora Glow
+ * Deep Midnight Obsidian Base with Precision Star/Cyber Matrix
+ */
 
 @layer base {
   :root {
-    --background: 152 40% 98%;
-    --foreground: 158 60% 15%;
+    --background: 228 45% 6%;
+    --foreground: 210 40% 98%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 158 60% 15%;
+    --card: 225 40% 10%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 158 60% 15%;
+    --popover: 225 40% 10%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 158 48% 32%;
-    --primary-foreground: 152 40% 98%;
+    /* Vivid Athletic Emerald */
+    --primary: 156 84% 44%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 152 45% 85%;
-    --secondary-foreground: 158 48% 32%;
+    --secondary: 225 30% 16%;
+    --secondary-foreground: 210 40% 96%;
 
-    --muted: 150 20% 94%;
-    --muted-foreground: 0 0% 29%;
+    --muted: 225 28% 14%;
+    --muted-foreground: 217 22% 75%;
 
-    --accent: 152 48% 55%;
-    --accent-foreground: 158 60% 15%;
+    --accent: 156 84% 44%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 350 89% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 152 20% 88%;
-    --input: 152 20% 88%;
-    --ring: 158 48% 32%;
+    --border: 225 25% 20%;
+    --input: 225 25% 20%;
+    --ring: 156 84% 44%;
 
     --radius: 0.875rem;
 
-    --success: 142 76% 36%;
-    --warning: 45 93% 47%;
-    --gradient-hero: linear-gradient(135deg, hsl(158 48% 32%), hsl(152 48% 55%));
-    --gradient-subtle: linear-gradient(180deg, hsl(152 40% 98%), hsl(152 45% 95%));
-    --shadow-soft: 0 4px 16px rgba(47, 122, 94, 0.08);
-    --shadow-medium: 0 8px 24px rgba(47, 122, 94, 0.12);
+    --success: 156 84% 44%;
+    --warning: 38 92% 50%;
+    --gradient-hero: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+    --gradient-subtle: linear-gradient(180deg, #090d1a 0%, #060913 100%);
+    --shadow-soft: 0 10px 30px -4px rgba(0, 0, 0, 0.6), 0 0 20px -2px rgba(16, 185, 129, 0.25);
+    --shadow-medium: 0 20px 45px -6px rgba(0, 0, 0, 0.75), 0 0 35px -2px rgba(16, 185, 129, 0.35);
 
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 228 45% 6%;
+    --sidebar-foreground: 210 40% 95%;
+    --sidebar-primary: 156 84% 44%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 225 30% 16%;
+    --sidebar-accent-foreground: 210 40% 95%;
+    --sidebar-border: 225 25% 20%;
+    --sidebar-ring: 156 84% 44%;
   }
 
   .dark {
-    --background: 158 35% 8%;
-    --foreground: 152 40% 98%;
+    --background: 228 45% 6%;
+    --foreground: 210 40% 98%;
 
-    --card: 158 30% 12%;
-    --card-foreground: 152 40% 98%;
+    --card: 225 40% 10%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 158 30% 12%;
-    --popover-foreground: 152 40% 98%;
+    --popover: 225 40% 10%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 152 48% 55%;
-    --primary-foreground: 158 60% 15%;
+    --primary: 156 84% 44%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 158 25% 20%;
-    --secondary-foreground: 152 40% 98%;
+    --secondary: 225 30% 16%;
+    --secondary-foreground: 210 40% 96%;
 
-    --muted: 158 25% 20%;
-    --muted-foreground: 152 20% 65%;
+    --muted: 225 28% 14%;
+    --muted-foreground: 217 22% 75%;
 
-    --accent: 152 48% 55%;
-    --accent-foreground: 152 40% 98%;
+    --accent: 156 84% 44%;
+    --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 152 40% 98%;
+    --destructive: 350 89% 60%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 158 25% 20%;
-    --input: 158 25% 20%;
-    --ring: 152 48% 55%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --border: 225 25% 20%;
+    --input: 225 25% 20%;
+    --ring: 156 84% 44%;
+
+    --sidebar-background: 228 45% 6%;
+    --sidebar-foreground: 210 40% 95%;
+    --sidebar-primary: 156 84% 44%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 225 30% 16%;
+    --sidebar-accent-foreground: 210 40% 95%;
+    --sidebar-border: 225 25% 20%;
+    --sidebar-ring: 156 84% 44%;
   }
 }
 
@@ -106,28 +103,158 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  html {
+    color-scheme: dark;
+    background-color: #070a14;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    min-height: 100vh;
+    background-color: #070a14;
+    /* Multi-layered Top 1% Luminous Aurora Cosmic Mesh */
+    background-image: 
+      /* 1. Luminous Emerald Core Beam (Top Center) */
+      radial-gradient(ellipse 90% 65% at 50% -12%, rgba(16, 185, 129, 0.45), transparent 70%),
+      /* 2. Radiant Cyber Cyan Upper-Right Nebula */
+      radial-gradient(circle 800px at 92% 18%, rgba(6, 182, 212, 0.35), transparent 60%),
+      /* 3. Deep Ultraviolet / Royal Violet Mid-Left Aura */
+      radial-gradient(circle 850px at 8% 48%, rgba(139, 92, 246, 0.30), transparent 65%),
+      /* 4. Warm Emerald Horizon Glow (Bottom Center) */
+      radial-gradient(ellipse 85% 50% at 50% 108%, rgba(16, 185, 129, 0.35), transparent 70%),
+      /* 5. Precision Cyber Dot Matrix */
+      radial-gradient(rgba(255, 255, 255, 0.12) 1.2px, transparent 1.2px),
+      /* 6. Rich Deep Midnight Obsidian Base */
+      linear-gradient(180deg, #070a14 0%, #05070e 100%);
+    background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 32px 32px, 100% 100%;
+    background-attachment: fixed;
+    background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, repeat, no-repeat;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif;
+    letter-spacing: -0.025em;
+  }
+
+  /* Vibrant Hero Title Gradient Glow */
+  h1 {
+    background: linear-gradient(135deg, #ffffff 30%, #6ee7b7 75%, #38bdf8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 35px rgba(16, 185, 129, 0.4));
   }
 }
 
-/* Glassmorphism utility */
+@layer utilities {
+  /* Prevent solid wrappers from hiding the vibrant aurora mesh */
+  .min-h-screen,
+  div.min-h-screen,
+  div.bg-background,
+  div.bg-gradient-to-b {
+    background-color: transparent !important;
+    background-image: none !important;
+  }
+}
+
+/* Glassmorphism, Radiance, and High-End Micro-interactions */
 @layer components {
+  /* Ultra-luxury translucent frosted cards */
+  .bg-card,
   .glass-card {
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 1px solid rgba(255,255,255,0.4);
-    box-shadow: var(--shadow-soft);
-    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    background: rgba(14, 21, 37, 0.72) !important;
+    backdrop-filter: blur(24px) saturate(190%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+    box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.65), 0 0 25px -3px rgba(16, 185, 129, 0.18) !important;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
   }
-  .dark .glass-card {
-    background: rgba(20, 24, 28, 0.35);
-    border: 1px solid rgba(255,255,255,0.04);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.45);
-  }
+
+  /* Card hover radiance */
+  .group:hover .bg-card,
+  .hover\:shadow-lg:hover,
+  .hover\:shadow-xl:hover,
   .glass-card:hover {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-medium);
+    border-color: rgba(52, 211, 153, 0.45) !important;
+    box-shadow: 0 24px 50px -12px rgba(0, 0, 0, 0.8), 0 0 35px 2px rgba(16, 185, 129, 0.32) !important;
+    transform: translateY(-3px);
   }
+
+  /* High-energy Primary CTA Action Button */
+  .bg-primary {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    box-shadow: 0 8px 25px -4px rgba(16, 185, 129, 0.6), 0 0 18px rgba(16, 185, 129, 0.4) !important;
+    border: 1px solid rgba(255, 255, 255, 0.22) !important;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+
+  .bg-primary:hover {
+    background: linear-gradient(135deg, #34d399 0%, #10b981 100%) !important;
+    box-shadow: 0 14px 40px -4px rgba(16, 185, 129, 0.8), 0 0 30px rgba(16, 185, 129, 0.6) !important;
+    transform: translateY(-2px) scale(1.02);
+  }
+
+  /* Outline Frosted Buttons */
+  .border-input {
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    background: rgba(255, 255, 255, 0.06) !important;
+    backdrop-filter: blur(14px) !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    transition: all 0.25s ease !important;
+  }
+
+  .border-input:hover {
+    background: rgba(255, 255, 255, 0.14) !important;
+    border-color: rgba(52, 211, 153, 0.6) !important;
+    box-shadow: 0 0 25px rgba(16, 185, 129, 0.35) !important;
+    transform: translateY(-2px);
+  }
+
+  /* Header luxury glassmorphism */
+  header {
+    background: rgba(7, 10, 20, 0.8) !important;
+    backdrop-filter: blur(24px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  /* Badge glows */
+  [class*="bg-success"] {
+    background: rgba(16, 185, 129, 0.22) !important;
+    color: #34d399 !important;
+    border: 1px solid rgba(16, 185, 129, 0.45) !important;
+  }
+  [class*="bg-warning"] {
+    background: rgba(245, 158, 11, 0.22) !important;
+    color: #fbbf24 !important;
+    border: 1px solid rgba(245, 158, 11, 0.45) !important;
+  }
+  [class*="bg-destructive"] {
+    background: rgba(244, 63, 94, 0.22) !important;
+    color: #fb7185 !important;
+    border: 1px solid rgba(244, 63, 94, 0.45) !important;
+  }
+}
+
+/* Custom sleek scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #070a14;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.6);
 }

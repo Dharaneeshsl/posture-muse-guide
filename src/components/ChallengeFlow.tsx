@@ -17,7 +17,7 @@ import {
 } from "@/utils/scoring";
 import { stabilityScore } from "@/utils/angles";
 import { NormalizedLandmark } from "@mediapipe/tasks-vision";
-import { Play, RotateCcw, SkipForward } from "lucide-react";
+import { Play, RotateCcw, SkipForward, Volume2, VolumeX } from "lucide-react";
 import LevelCompleteOverlay from "./LevelCompleteOverlay";
 
 interface PoseData {
@@ -32,6 +32,44 @@ interface PoseData {
   tips: string[];
   hold_seconds: number;
 }
+
+const MOTIVATIONAL_LINES = [
+  "Keep going, you can do it! Stay hard!",
+  "Stay hard! Don't quit, you've got this!",
+  "Halfway there! Stay strong and hold the form!",
+  "Push through the burn! Lock it in, stay hard!",
+  "Breathe through it, you're doing amazing! Keep going!",
+  "Lock in your focus! Stay hard, finish strong!"
+];
+
+const speakVoice = (text: string, priority: boolean = false) => {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
+  try {
+    if (priority || !window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.05;
+      utterance.pitch = 1.0;
+      utterance.volume = 1.0;
+      const voices = window.speechSynthesis.getVoices();
+      const preferredVoice = voices.find(v =>
+        v.lang.startsWith("en") && (
+          v.name.includes("Natural") ||
+          v.name.includes("Google") ||
+          v.name.includes("Samantha") ||
+          v.name.includes("Daniel") ||
+          v.name.includes("Aaron")
+        )
+      );
+      if (preferredVoice) {
+        utterance.voice = preferredVoice;
+      }
+      window.speechSynthesis.speak(utterance);
+    }
+  } catch (err) {
+    console.warn("Speech synthesis error:", err);
+  }
+};
 
 interface ChallengeFlowProps {
   challengeLevels: Array<{ level: number; slug: string; name: string; difficulty: string }>;
@@ -58,11 +96,23 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
   const frameScoresRef = useRef<FrameScore[]>([]);
   const angleTimeSeriesRef = useRef<Record<string, number[]>>({});
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const motivationPlayedRef = useRef<boolean>(false);
+  const [voiceCoachEnabled, setVoiceCoachEnabled] = useState(true);
+  const voiceCoachEnabledRef = useRef<boolean>(true);
+  const lastHintSpokenTimeRef = useRef<number>(0);
+
+  useEffect(() => {
+    voiceCoachEnabledRef.current = voiceCoachEnabled;
+    if (!voiceCoachEnabled && typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+  }, [voiceCoachEnabled]);
   // Buffer angles collected during the current 1s window
   const lastSecondAnglesRef = useRef<Record<string, number[]>>({});
   const [liveAnglesAvg, setLiveAnglesAvg] = useState<Record<string, number>>({});
   const perSecondIntervalRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(0);
+  const completeLevelRef = useRef<() => void>(() => {});
   const [sessionData, setSessionData] = useState<{
     accuracy: number;
     stability: number;
@@ -77,12 +127,18 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
 
   const resetLevel = useCallback(() => {
     setIsHolding(false);
+    motivationPlayedRef.current = false;
     setCountdown(3);
     setHoldProgress(0);
     setLiveSimilarity(0);
     frameScoresRef.current = [];
     angleTimeSeriesRef.current = {};
     startTimeRef.current = 0;
+    motivationPlayedRef.current = false;
+    lastHintSpokenTimeRef.current = 0;
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
   }, []);
 
   const handleBegin = useCallback(() => {
@@ -90,15 +146,28 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
     
     let count = 3;
     setCountdown(count);
+    if (voiceCoachEnabledRef.current) {
+      speakVoice("Three", true);
+    }
     
     const countdownInterval = setInterval(() => {
       count--;
       setCountdown(count);
+      if (count === 2 && voiceCoachEnabledRef.current) {
+        speakVoice("Two", true);
+      } else if (count === 1 && voiceCoachEnabledRef.current) {
+        speakVoice("One", true);
+      }
       
       if (count === 0) {
         clearInterval(countdownInterval);
         setIsHolding(true);
+        motivationPlayedRef.current = false;
+        lastHintSpokenTimeRef.current = Date.now();
         startTimeRef.current = Date.now();
+        if (voiceCoachEnabledRef.current) {
+          speakVoice("Hold!", true);
+        }
         // Start background music when the hold begins
         try {
           audioRef.current?.play().catch((e) => {
@@ -150,9 +219,29 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
     const progress = Math.min(100, (elapsed / (holdDuration * 1000)) * 100);
     setHoldProgress(progress);
 
-    // Complete when hold duration reached
+    const now = Date.now();
+
+    // 1. Spoken motivational line in the middle of the hold (at ~45% - 50% progress)
+    if (progress >= 45 && progress < 80 && !motivationPlayedRef.current && voiceCoachEnabledRef.current) {
+      motivationPlayedRef.current = true;
+      lastHintSpokenTimeRef.current = now;
+      const line = MOTIVATIONAL_LINES[Math.floor(Math.random() * MOTIVATIONAL_LINES.length)];
+      speakVoice(line, true);
+    }
+    // 2. Real-time posture guidance voice cues (throttled every 4.5 seconds)
+    else if (
+      voiceCoachEnabledRef.current &&
+      hints.length > 0 &&
+      now - lastHintSpokenTimeRef.current > 4500 &&
+      (progress < 38 || progress > 62)
+    ) {
+      lastHintSpokenTimeRef.current = now;
+      const naturalHint = hints[0].replace(/≈/g, 'about ').replace(/°/g, ' degrees');
+      speakVoice(naturalHint, false);
+    }
+
     if (progress >= 100) {
-      completeLevel();
+      completeLevelRef.current();
     }
   }, [isHolding, currentPose, holdDuration]);
 
@@ -199,6 +288,9 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
     }
 
     return () => {
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
       if (perSecondIntervalRef.current) {
         clearInterval(perSecondIntervalRef.current);
         perSecondIntervalRef.current = null;
@@ -209,6 +301,9 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
   // Cleanup audio on unmount
   useEffect(() => {
     return () => {
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
       try {
         if (audioRef.current) {
           audioRef.current.pause();
@@ -224,6 +319,7 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
     if (!currentPose) return;
 
     setIsHolding(false);
+    motivationPlayedRef.current = false;
 
     // Compute final metrics
     const lastFrame = frameScoresRef.current[frameScoresRef.current.length - 1];
@@ -257,14 +353,17 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
       // Prefer the session-based computation (scaled to 0-10), but fall back to
       // a simple average of accuracy/stability/symmetry scaled to 0-10 if data is sparse.
   // Use per-level score formula (0-10 scale): round((accuracy + stability + symmetry) / 30)
-  overallScore: Math.round((accuracy + avgStability + symmetry) / 30)
-    } as any);
+  overallScore: Math.round((accuracy + avgStability + symmetry) / 3)
+    });
 
     // Show completion overlay for 3s then show the summary page
     const percent = Math.round((accuracy + avgStability + symmetry) / 3);
     setOverlayPercent(percent);
     setOverlayGrade(grade);
     setOverlayVisible(true);
+    if (voiceCoachEnabledRef.current) {
+      speakVoice(`Great job! Pose complete! Grade: ${grade}`, true);
+    }
     setTimeout(() => {
       setOverlayVisible(false);
       setShowSummary(true);
@@ -279,12 +378,13 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
       /* ignore */
     }
   }, [currentPose]);
+  completeLevelRef.current = completeLevel;
 
   const handleNextLevel = useCallback(() => {
     // Store the score for this level
     if (sessionData) {
   // Compute per-level score using provided formula: round((accuracy + stability + symmetry) / 30)
-  const perLevelScore = Math.round((sessionData.accuracy + sessionData.stability + sessionData.symmetry) / 30);
+  const perLevelScore = Math.round((sessionData.accuracy + sessionData.stability + sessionData.symmetry) / 3);
 
   const newScores = [...levelScores];
   newScores[currentLevel] = perLevelScore;
@@ -312,7 +412,7 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
       }
       setShowFinalSummary(true);
     }
-  }, [currentLevel, challengeLevels.length, resetLevel, sessionData, levelScores]);
+  }, [currentLevel, challengeLevels.length, resetLevel, sessionData, levelScores, levelFeedbacks]);
 
   
 
@@ -339,13 +439,13 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
       }
       setShowFinalSummary(true);
     }
-  }, [currentLevel, challengeLevels.length, resetLevel, levelScores]);
+  }, [currentLevel, challengeLevels.length, resetLevel, levelScores, levelFeedbacks]);
 
   const handleCompleteChallenge = useCallback(() => {
     // Save the current session data for this level (if any) and finish the entire challenge
     if (sessionData) {
   // Use provided formula for per-level score
-  const perLevelScore = Math.round((sessionData.accuracy + sessionData.stability + sessionData.symmetry) / 30);
+  const perLevelScore = Math.round((sessionData.accuracy + sessionData.stability + sessionData.symmetry) / 3);
 
   const newScores = [...levelScores];
   newScores[currentLevel] = perLevelScore;
@@ -537,6 +637,25 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
                   Complete Challenge
                 </Button>
               )}
+              <Button
+                onClick={() => setVoiceCoachEnabled(prev => !prev)}
+                variant="ghost"
+                size="sm"
+                className="ml-auto transition-colors"
+                title={voiceCoachEnabled ? "Mute Voice Coach" : "Enable Voice Coach"}
+              >
+                {voiceCoachEnabled ? (
+                  <>
+                    <Volume2 className="w-4 h-4 mr-1.5 text-emerald-400" />
+                    <span className="text-xs">Voice: On</span>
+                  </>
+                ) : (
+                  <>
+                    <VolumeX className="w-4 h-4 mr-1.5 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">Voice: Off</span>
+                  </>
+                )}
+              </Button>
               {currentLevel < challengeLevels.length - 1 && (
                 <Button
                   onClick={handleSkipLevel}

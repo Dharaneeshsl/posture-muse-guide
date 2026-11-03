@@ -12,7 +12,8 @@ export function CameraView({ isActive, onPoseDetected }: CameraViewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [poseLandmarker, setPoseLandmarker] = useState<PoseLandmarker | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const animationFrameRef = useRef<number>();
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const animationFrameRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     let isMounted = true;
@@ -20,20 +21,36 @@ export function CameraView({ isActive, onPoseDetected }: CameraViewProps) {
     const initializePoseLandmarker = async () => {
       try {
         const vision = await FilesetResolver.forVisionTasks(
-          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
+          "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22-rc.20250304/wasm"
         );
 
-        const landmarker = await PoseLandmarker.createFromOptions(vision, {
-          baseOptions: {
-            modelAssetPath: "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/latest/pose_landmarker_full.task",
-            delegate: "GPU"
-          },
-          runningMode: "VIDEO",
-          numPoses: 1,
-          minPoseDetectionConfidence: 0.5,
-          minPosePresenceConfidence: 0.5,
-          minTrackingConfidence: 0.5
-        });
+        let landmarker: PoseLandmarker;
+        try {
+          landmarker = await PoseLandmarker.createFromOptions(vision, {
+            baseOptions: {
+              modelAssetPath: "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/latest/pose_landmarker_full.task",
+              delegate: "GPU"
+            },
+            runningMode: "VIDEO",
+            numPoses: 1,
+            minPoseDetectionConfidence: 0.5,
+            minPosePresenceConfidence: 0.5,
+            minTrackingConfidence: 0.5
+          });
+        } catch (gpuError) {
+          console.warn("GPU delegate unavailable, falling back to CPU:", gpuError);
+          landmarker = await PoseLandmarker.createFromOptions(vision, {
+            baseOptions: {
+              modelAssetPath: "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/latest/pose_landmarker_full.task",
+              delegate: "CPU"
+            },
+            runningMode: "VIDEO",
+            numPoses: 1,
+            minPoseDetectionConfidence: 0.5,
+            minPosePresenceConfidence: 0.5,
+            minTrackingConfidence: 0.5
+          });
+        }
 
         if (isMounted) {
           setPoseLandmarker(landmarker);
@@ -41,7 +58,9 @@ export function CameraView({ isActive, onPoseDetected }: CameraViewProps) {
         }
       } catch (error) {
         console.error("Error initializing pose landmarker:", error);
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
@@ -55,17 +74,30 @@ export function CameraView({ isActive, onPoseDetected }: CameraViewProps) {
   useEffect(() => {
     if (!isActive || !poseLandmarker) return;
 
+    let activeStream: MediaStream | null = null;
+    const currentVideo = videoRef.current;
+
     const startCamera = async () => {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: 1280, height: 720, facingMode: "user" },
-          audio: false
-        });
+        let stream: MediaStream;
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" },
+            audio: false
+          });
+        } catch {
+          stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+            audio: false
+          });
+        }
+
+        activeStream = stream;
 
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           videoRef.current.onloadedmetadata = () => {
-            videoRef.current?.play();
+            videoRef.current?.play().catch(e => console.warn("Video play error:", e));
             if (canvasRef.current && videoRef.current) {
               canvasRef.current.width = videoRef.current.videoWidth;
               canvasRef.current.height = videoRef.current.videoHeight;
@@ -75,6 +107,7 @@ export function CameraView({ isActive, onPoseDetected }: CameraViewProps) {
         }
       } catch (error) {
         console.error("Error accessing camera:", error);
+        setCameraError("Camera unavailable. Please check that camera permissions are enabled in your browser.");
       }
     };
 
@@ -97,28 +130,25 @@ export function CameraView({ isActive, onPoseDetected }: CameraViewProps) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // Draw landmarks
-        if (results.landmarks && results.landmarks.length > 0) {
-          const drawingUtils = new DrawingUtils(ctx);
-          // Work with a shallow copy so we don't mutate Mediapipe internals
-          const rawLandmarks = results.landmarks[0];
-          const landmarks: NormalizedLandmark[] = rawLandmarks.map(l => ({ ...l }));
+      if (results.landmarks && results.landmarks.length > 0) {
+        const drawingUtils = new DrawingUtils(ctx);
+        const rawLandmarks = results.landmarks[0];
+        const landmarks: NormalizedLandmark[] = rawLandmarks.map(l => ({ ...l }));
 
-          // Draw pose connections using the detected landmarks
-          drawingUtils.drawLandmarks(landmarks, {
-            radius: 4,
-            color: "rgba(95, 191, 132, 0.8)",
-            fillColor: "rgba(95, 191, 132, 1)"
-          });
-          drawingUtils.drawConnectors(
-            landmarks,
-            PoseLandmarker.POSE_CONNECTIONS,
-            { color: "rgba(47, 122, 94, 0.8)", lineWidth: 3 }
-          );
+        drawingUtils.drawLandmarks(landmarks, {
+          radius: 4,
+          color: "rgba(95, 191, 132, 0.8)",
+          fillColor: "rgba(95, 191, 132, 1)"
+        });
+        drawingUtils.drawConnectors(
+          landmarks,
+          PoseLandmarker.POSE_CONNECTIONS,
+          { color: "rgba(47, 122, 94, 0.8)", lineWidth: 3 }
+        );
 
-          // Extract angles and notify parent using detected landmarks
-          const angles = extractAnglesFromLandmarks(landmarks);
-          onPoseDetected?.(angles, landmarks);
-        }
+        const angles = extractAnglesFromLandmarks(landmarks);
+        onPoseDetected?.(angles, landmarks);
+      }
 
       animationFrameRef.current = requestAnimationFrame(detectPose);
     };
@@ -129,9 +159,11 @@ export function CameraView({ isActive, onPoseDetected }: CameraViewProps) {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
-      if (videoRef.current?.srcObject) {
-        const stream = videoRef.current.srcObject as MediaStream;
-        stream.getTracks().forEach(track => track.stop());
+      if (activeStream) {
+        activeStream.getTracks().forEach(track => track.stop());
+      }
+      if (currentVideo) {
+        currentVideo.srcObject = null;
       }
     };
   }, [isActive, poseLandmarker, onPoseDetected]);
@@ -143,6 +175,11 @@ export function CameraView({ isActive, onPoseDetected }: CameraViewProps) {
           <p className="text-muted-foreground">Loading pose detection...</p>
         </div>
       )}
+      {cameraError && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/80 p-4 text-center z-20">
+          <p className="text-destructive font-medium">{cameraError}</p>
+        </div>
+      )}
       <video
         ref={videoRef}
         className="w-full h-full object-cover"
@@ -151,7 +188,7 @@ export function CameraView({ isActive, onPoseDetected }: CameraViewProps) {
       />
       <canvas
         ref={canvasRef}
-        className="absolute top-0 left-0 w-full h-full pointer-events-none"
+        className="absolute inset-0 w-full h-full object-cover pointer-events-none"
       />
     </div>
   );

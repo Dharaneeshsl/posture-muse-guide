@@ -6,15 +6,21 @@ export interface Point3D {
   z: number;
 }
 
+function isValidPoint(p?: Point3D): p is Point3D {
+  return p !== undefined && p !== null && typeof p.x === "number" && typeof p.y === "number" && typeof p.z === "number" && !isNaN(p.x) && !isNaN(p.y) && !isNaN(p.z);
+}
+
 /**
  * Compute the angle in degrees between three 3D points (A-B-C)
  * B is the vertex of the angle
  */
 export function computeAngle(
-  jointA: Point3D,
-  jointB: Point3D,
-  jointC: Point3D
+  jointA?: Point3D,
+  jointB?: Point3D,
+  jointC?: Point3D
 ): number {
+  if (!isValidPoint(jointA) || !isValidPoint(jointB) || !isValidPoint(jointC)) return 0;
+
   const vectorBA = {
     x: jointA.x - jointB.x,
     y: jointA.y - jointB.y,
@@ -95,61 +101,72 @@ export function extractAnglesFromLandmarks(
   landmarks: NormalizedLandmark[]
 ): Record<string, number> {
   const angles: Record<string, number> = {};
+  if (!landmarks || !Array.isArray(landmarks) || landmarks.length === 0) {
+    return angles;
+  }
+
+  const safeAngle = (idxA: number, idxB: number, idxC: number) => {
+    const a = landmarks[idxA];
+    const b = landmarks[idxB];
+    const c = landmarks[idxC];
+    if (!a || !b || !c) return 0;
+    return computeAngle(a, b, c);
+  };
   
   // Left shoulder angle: wrist-shoulder-hip
-  angles.left_shoulder_angle = computeAngle(
-    landmarks[PoseLandmarkIndices.LEFT_WRIST],
-    landmarks[PoseLandmarkIndices.LEFT_SHOULDER],
-    landmarks[PoseLandmarkIndices.LEFT_HIP]
+  angles.left_shoulder_angle = safeAngle(
+    PoseLandmarkIndices.LEFT_WRIST,
+    PoseLandmarkIndices.LEFT_SHOULDER,
+    PoseLandmarkIndices.LEFT_HIP
   );
   
   // Right shoulder angle: wrist-shoulder-hip
-  angles.right_shoulder_angle = computeAngle(
-    landmarks[PoseLandmarkIndices.RIGHT_WRIST],
-    landmarks[PoseLandmarkIndices.RIGHT_SHOULDER],
-    landmarks[PoseLandmarkIndices.RIGHT_HIP]
+  angles.right_shoulder_angle = safeAngle(
+    PoseLandmarkIndices.RIGHT_WRIST,
+    PoseLandmarkIndices.RIGHT_SHOULDER,
+    PoseLandmarkIndices.RIGHT_HIP
   );
   
   // Left elbow angle: shoulder-elbow-wrist
-  angles.left_elbow_angle = computeAngle(
-    landmarks[PoseLandmarkIndices.LEFT_SHOULDER],
-    landmarks[PoseLandmarkIndices.LEFT_ELBOW],
-    landmarks[PoseLandmarkIndices.LEFT_WRIST]
+  angles.left_elbow_angle = safeAngle(
+    PoseLandmarkIndices.LEFT_SHOULDER,
+    PoseLandmarkIndices.LEFT_ELBOW,
+    PoseLandmarkIndices.LEFT_WRIST
   );
   
   // Right elbow angle: shoulder-elbow-wrist
-  angles.right_elbow_angle = computeAngle(
-    landmarks[PoseLandmarkIndices.RIGHT_SHOULDER],
-    landmarks[PoseLandmarkIndices.RIGHT_ELBOW],
-    landmarks[PoseLandmarkIndices.RIGHT_WRIST]
+  angles.right_elbow_angle = safeAngle(
+    PoseLandmarkIndices.RIGHT_SHOULDER,
+    PoseLandmarkIndices.RIGHT_ELBOW,
+    PoseLandmarkIndices.RIGHT_WRIST
   );
   
   // Left hip angle: shoulder-hip-knee
-  angles.left_hip_angle = computeAngle(
-    landmarks[PoseLandmarkIndices.LEFT_SHOULDER],
-    landmarks[PoseLandmarkIndices.LEFT_HIP],
-    landmarks[PoseLandmarkIndices.LEFT_KNEE]
+  angles.left_hip_angle = safeAngle(
+    PoseLandmarkIndices.LEFT_SHOULDER,
+    PoseLandmarkIndices.LEFT_HIP,
+    PoseLandmarkIndices.LEFT_KNEE
   );
   
   // Right hip angle: shoulder-hip-knee
-  angles.right_hip_angle = computeAngle(
-    landmarks[PoseLandmarkIndices.RIGHT_SHOULDER],
-    landmarks[PoseLandmarkIndices.RIGHT_HIP],
-    landmarks[PoseLandmarkIndices.RIGHT_KNEE]
+  angles.right_hip_angle = safeAngle(
+    PoseLandmarkIndices.RIGHT_SHOULDER,
+    PoseLandmarkIndices.RIGHT_HIP,
+    PoseLandmarkIndices.RIGHT_KNEE
   );
   
   // Left knee angle: hip-knee-ankle
-  angles.left_knee_angle = computeAngle(
-    landmarks[PoseLandmarkIndices.LEFT_HIP],
-    landmarks[PoseLandmarkIndices.LEFT_KNEE],
-    landmarks[PoseLandmarkIndices.LEFT_ANKLE]
+  angles.left_knee_angle = safeAngle(
+    PoseLandmarkIndices.LEFT_HIP,
+    PoseLandmarkIndices.LEFT_KNEE,
+    PoseLandmarkIndices.LEFT_ANKLE
   );
   
   // Right knee angle: hip-knee-ankle
-  angles.right_knee_angle = computeAngle(
-    landmarks[PoseLandmarkIndices.RIGHT_HIP],
-    landmarks[PoseLandmarkIndices.RIGHT_KNEE],
-    landmarks[PoseLandmarkIndices.RIGHT_ANKLE]
+  angles.right_knee_angle = safeAngle(
+    PoseLandmarkIndices.RIGHT_HIP,
+    PoseLandmarkIndices.RIGHT_KNEE,
+    PoseLandmarkIndices.RIGHT_ANKLE
   );
   
   return angles;

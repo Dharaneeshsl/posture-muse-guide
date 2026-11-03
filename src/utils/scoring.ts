@@ -41,16 +41,20 @@ export function similarityScore(
     const tolerance = tolerances[angleName] || 30;
     const weight = weights[angleName] || 1;
     
-    if (userAngle === undefined || targetAngle === undefined) continue;
+    // Always include weight in totalWeight so missing joints penalize the score
+    totalWeight += weight;
+
+    if (userAngle === undefined || targetAngle === undefined || isNaN(userAngle)) {
+      deviations[angleName] = 180;
+      continue;
+    }
     
     const diff = Math.abs(userAngle - targetAngle);
     deviations[angleName] = diff;
     
     // Score per angle: max(0, 1 - diff/tolerance)
     const angleScore = Math.max(0, 1 - diff / tolerance);
-    
     weightedSum += angleScore * weight;
-    totalWeight += weight;
   }
   
   const finalScore = totalWeight > 0 ? weightedSum / totalWeight : 0;

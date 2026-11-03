@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 
 interface OverlayProps {
   percent: number;
@@ -10,13 +10,18 @@ interface OverlayProps {
 export const LevelCompleteOverlay: React.FC<OverlayProps> = ({ percent, grade, durationMs = 3000, onDone }) => {
   // Choose emoji by grade
   const emoji = grade === "Advanced" ? "😎" : grade === "Intermediate" ? "😁" : "😊";
+  const onDoneRef = useRef(onDone);
+
+  useEffect(() => {
+    onDoneRef.current = onDone;
+  }, [onDone]);
 
   useEffect(() => {
     const t = setTimeout(() => {
-      onDone?.();
+      onDoneRef.current?.();
     }, durationMs);
     return () => clearTimeout(t);
-  }, [durationMs, onDone]);
+  }, [durationMs]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">

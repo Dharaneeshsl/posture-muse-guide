@@ -1,16 +1,23 @@
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+export interface PoseBenefitItem {
+  slug: string;
+  name?: string;
+  benefits?: string[];
+  [key: string]: unknown;
+}
+
 interface BenefitsCardProps {
-  pose?: any;
+  pose?: PoseBenefitItem;
   poseSlug?: string;
-  poseLibrary?: any[];
+  poseLibrary?: PoseBenefitItem[];
 }
 
 export const BenefitsCard: React.FC<BenefitsCardProps> = ({ pose, poseSlug, poseLibrary }) => {
   let p = pose;
   if (!p && poseSlug && poseLibrary) {
-    p = poseLibrary.find((x: any) => x.slug === poseSlug);
+    p = poseLibrary.find((x) => x.slug === poseSlug);
   }
 
   const benefits: string[] = p?.benefits || [];

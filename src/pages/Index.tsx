@@ -30,13 +30,38 @@ const Index = () => {
   const [view, setView] = useState<"landing" | "main" | "challenge">("landing");
   const [posesData, setPosesData] = useState<PosesJson | null>(null);
   const [selectedPose, setSelectedPose] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const loadPoses = () => {
+    setLoadError(null);
+    fetch("/poses.json")
+      .then(res => {
+        if (!res.ok) throw new Error(`Failed to fetch pose data: ${res.status}`);
+        return res.json();
+      })
+      .then(data => setPosesData(data))
+      .catch(err => {
+        console.error("Failed to load poses:", err);
+        setLoadError("Failed to load poses data. Please check your network and try again.");
+      });
+  };
 
   useEffect(() => {
-    fetch("/poses.json")
-      .then(res => res.json())
-      .then(data => setPosesData(data))
-      .catch(err => console.error("Failed to load poses:", err));
+    loadPoses();
   }, []);
+
+  if (loadError) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background p-4">
+        <div className="text-center space-y-4 max-w-md">
+          <p className="text-destructive font-medium">{loadError}</p>
+          <Button onClick={loadPoses} variant="outline">
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (!posesData) {
     return (
@@ -106,7 +131,7 @@ const Index = () => {
           >
             <Button
               size="lg"
-              onClick={() => setView("challenge")}
+              onClick={() => { setSelectedPose(null); setView("challenge"); }}
               className="text-lg px-8 py-6 shadow-lg hover:shadow-xl transition-all"
             >
               <Trophy className="w-5 h-5 mr-2" />
@@ -160,7 +185,7 @@ const Index = () => {
         <div className="max-w-7xl mx-auto">
           <Button
             variant="ghost"
-            onClick={() => setView(isSinglePractice ? "main" : "landing")}
+            onClick={() => { setView(isSinglePractice ? "main" : "landing"); setSelectedPose(null); }}
             className="mb-6"
           >
             ← Back
