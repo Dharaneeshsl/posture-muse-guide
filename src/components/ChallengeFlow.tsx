@@ -183,8 +183,7 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
       return;
     }
     if (liveFeedback && liveFeedback.length > 0) {
-      const topHint = liveFeedback[0].replace(/≈/g, 'about ').replace(/°/g, ' degrees');
-      speakVoice(`Form check: ${topHint}`, true);
+      speakVoice(`Form check: ${liveFeedback[0]}`, true);
     } else if (liveSimilarity >= 75) {
       speakVoice(`Excellent alignment! Similarity is ${liveSimilarity} percent. Maintain your steady breath.`, true);
     } else {
@@ -763,12 +762,12 @@ const safePauseAudio = useCallback(() => {
             <div className="mt-3">
               <div className="glass-card p-3 rounded-md">
                 <div className="flex items-center justify-between">
-                  <div className="text-sm font-semibold">Live Feedback</div>
+                  <div className="text-sm font-semibold">Posture Guidance</div>
                   <div className="text-xs text-muted-foreground">Similarity: <span className="font-bold text-accent">{liveSimilarity}%</span></div>
                 </div>
                 <div className="mt-2 text-sm text-muted-foreground">
                   {liveFeedback.length === 0 ? (
-                    <div className="italic">Hold steady — awaiting pose analysis...</div>
+                    <div className="italic">Hold steady and breathe smoothly — great focus!</div>
                   ) : (
                     <ul className="list-disc list-inside space-y-1">
                       {liveFeedback.map((f, i) => (

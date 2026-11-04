@@ -87,7 +87,8 @@ export function scoreToGrade(score: number): "Beginner" | "Intermediate" | "Adva
 }
 
 /**
- * Generate feedback hints based on largest deviations
+ * Generate human-friendly, biomechanically intuitive yoga coaching suggestions.
+ * Uses pure natural English language cues with NO degrees, angle values, or mathematical symbols.
  */
 export function generateFeedback(
   deviations: Record<string, number>,
@@ -102,7 +103,7 @@ export function generateFeedback(
   const hints: string[] = [];
   
   for (const [angleName, deviation] of sortedDeviations) {
-    if (deviation < 10) continue; // Skip small deviations
+    if (deviation < 10) continue; // Skip minor/negligible deviations
     
     const target = targetAngles[angleName];
     const current = userAngles[angleName];
@@ -113,16 +114,108 @@ export function generateFeedback(
       .trim();
 
     if (current === undefined || isNaN(current)) {
-      hints.push(`Bring ${jointLabel} into view`);
+      hints.push(`Step back so your ${jointLabel} is clearly visible in the camera`);
       continue;
     }
 
-    const diff = Math.round(target - current);
-    
-    if (diff > 0) {
-      hints.push(`Open ${jointLabel} by ≈${Math.abs(diff)}°`);
-    } else {
-      hints.push(`Close ${jointLabel} by ≈${Math.abs(diff)}°`);
+    const diff = target - current;
+    const absDiff = Math.abs(diff);
+    const isSignificant = absDiff >= 25;
+
+    // Biomechanical natural English coaching cues
+    switch (angleName) {
+      case "left_knee_angle":
+      case "right_knee_angle": {
+        const side = angleName.includes("left") ? "left" : "right";
+        if (diff > 0) {
+          // target angle is larger (straighter) than current angle -> user is bending too much
+          hints.push(
+            isSignificant
+              ? `Straighten your ${side} leg and engage your thigh`
+              : `Straighten your ${side} leg slightly`
+          );
+        } else {
+          // target angle is smaller (more bent) than current angle -> user needs to deepen bend
+          hints.push(
+            isSignificant
+              ? `Deepen the bend in your ${side} knee`
+              : `Bend your ${side} knee a little more`
+          );
+        }
+        break;
+      }
+
+      case "left_elbow_angle":
+      case "right_elbow_angle": {
+        const side = angleName.includes("left") ? "left" : "right";
+        if (diff > 0) {
+          // target angle is larger (straighter) -> user elbow is bent
+          hints.push(
+            isSignificant
+              ? `Straighten and extend your ${side} arm fully`
+              : `Lengthen and reach further through your ${side} arm`
+          );
+        } else {
+          // target angle is smaller (more bent) -> user arm is too straight
+          hints.push(
+            isSignificant
+              ? `Bend your ${side} elbow into position`
+              : `Relax and soften your ${side} elbow slightly`
+          );
+        }
+        break;
+      }
+
+      case "left_shoulder_angle":
+      case "right_shoulder_angle": {
+        const side = angleName.includes("left") ? "left" : "right";
+        if (diff > 0) {
+          // target angle is larger -> user arm is held too low
+          hints.push(
+            isSignificant
+              ? `Raise your ${side} arm higher and reach through your fingertips`
+              : `Lift your ${side} arm upward`
+          );
+        } else {
+          // target angle is smaller -> user arm is held too high
+          hints.push(
+            isSignificant
+              ? `Lower your ${side} arm and relax your shoulder`
+              : `Lower your ${side} arm slightly`
+          );
+        }
+        break;
+      }
+
+      case "left_hip_angle":
+      case "right_hip_angle": {
+        const side = angleName.includes("left") ? "left" : "right";
+        if (diff > 0) {
+          // target is straighter/upright -> user is folding or leaning too far
+          hints.push(
+            isSignificant
+              ? `Lift your torso upright and open your chest`
+              : `Stand taller and lengthen your spine`
+          );
+        } else {
+          // target is more folded -> user needs to hinge deeper
+          hints.push(
+            isSignificant
+              ? `Hinge deeper at your hips and fold forward`
+              : `Sink your hips lower into the stretch`
+          );
+        }
+        break;
+      }
+
+      default: {
+        if (diff > 0) {
+          hints.push(`Extend and lengthen your ${jointLabel}`);
+        } else {
+          hints.push(`Draw in and gently bend your ${jointLabel}`);
+        }
+        break;
+      }
     }
   }
   
