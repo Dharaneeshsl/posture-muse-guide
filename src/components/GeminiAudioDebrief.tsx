@@ -127,53 +127,53 @@ export function GeminiAudioDebrief({
       {/* Decorative top aura */}
       <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-72 h-20 bg-purple-500/20 rounded-full blur-3xl pointer-events-none" />
 
-      <CardHeader className="pb-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-400">
-              <Sparkles className="w-5 h-5 animate-pulse" />
+      <CardHeader className="p-2.5 sm:p-3 pb-2">
+        <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="p-1.5 sm:p-2 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-400 flex-shrink-0">
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 animate-pulse" />
             </div>
-            <div>
-              <CardTitle className="text-lg font-bold flex items-center gap-2 text-foreground">
-                AI Coach Audio Debrief
-                <Badge variant="outline" className="border-purple-400/40 text-purple-300 text-[10px] px-2 py-0.5">
-                  Powered by Gemini
+            <div className="min-w-0">
+              <CardTitle className="text-xs sm:text-base font-bold flex flex-wrap items-center gap-1.5 text-foreground">
+                <span>AI Coach Debrief</span>
+                <Badge variant="outline" className="border-purple-400/40 text-purple-300 text-[9px] sm:text-[10px] px-1.5 py-0.2">
+                  Gemini
                 </Badge>
               </CardTitle>
-              <CardDescription className="text-xs text-muted-foreground">
-                Personalized biomechanical voice breakdown of your performance
+              <CardDescription className="text-[10px] sm:text-xs text-muted-foreground truncate max-w-[220px] sm:max-w-none">
+                Biomechanical voice breakdown of your performance
               </CardDescription>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
             <Button
               onClick={fetchDebrief}
               disabled={isLoading}
               variant="ghost"
               size="sm"
-              className="text-xs text-muted-foreground hover:text-foreground h-8 px-2"
+              className="text-xs text-muted-foreground hover:text-foreground h-8 px-1.5 sm:px-2"
               title="Regenerate Debrief with Gemini"
             >
-              <RotateCw className={`w-3.5 h-3.5 mr-1 ${isLoading ? "animate-spin" : ""}`} />
-              Regenerate
+              <RotateCw className={`w-3.5 h-3.5 sm:mr-1 ${isLoading ? "animate-spin" : ""}`} />
+              <span className="hidden xs:inline">Regenerate</span>
             </Button>
             <Button
               onClick={togglePlayback}
               disabled={isLoading || !debriefText}
               variant="default"
               size="sm"
-              className="h-8 gap-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-md text-xs font-medium"
+              className="h-8 gap-1 sm:gap-1.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-md text-xs font-medium px-2 sm:px-3"
             >
               {isPlaying ? (
                 <>
                   <Pause className="w-3.5 h-3.5" />
-                  <span>Pause Audio</span>
+                  <span>Pause</span>
                 </>
               ) : (
                 <>
                   <Volume2 className="w-3.5 h-3.5" />
-                  <span>Listen to Coach</span>
+                  <span>Listen</span>
                 </>
               )}
             </Button>

@@ -23,17 +23,17 @@ export const BenefitsCard: React.FC<BenefitsCardProps> = ({ pose, poseSlug, pose
   const benefits: string[] = p?.benefits || [];
 
   return (
-    <Card className="border-accent/20 shadow-sm">
-      <CardHeader>
-        <CardTitle className="font-semibold text-accent">Health Benefits</CardTitle>
+    <Card className="border-accent/20 shadow-sm p-2.5 sm:p-3 bg-card/70">
+      <CardHeader className="p-0 pb-1.5 flex flex-row items-center justify-between border-b border-border/40">
+        <CardTitle className="text-xs font-bold text-accent">Health Benefits</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-0 pt-1.5">
         {benefits.length === 0 ? (
-          <div className="text-base text-muted-foreground">Benefits information not available for this pose.</div>
+          <div className="text-xs text-muted-foreground italic">Benefits information not available for this pose.</div>
         ) : (
-          <ul className="list-disc list-inside space-y-3 text-base text-foreground">
-            {benefits.map((b, i) => (
-              <li key={i} className="font-medium text-base">{b}</li>
+          <ul className="list-disc list-inside space-y-1 text-xs text-foreground">
+            {benefits.slice(0, 3).map((b, i) => (
+              <li key={i} className="font-medium text-[11px] sm:text-xs leading-snug">{b}</li>
             ))}
           </ul>
         )}

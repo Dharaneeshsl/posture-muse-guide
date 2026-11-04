@@ -159,40 +159,40 @@ export function FinalSummary({ levelScores, levelFeedbacks, levelDetails, poseLi
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="w-full max-w-5xl mx-auto h-full max-h-[calc(100vh-3.5rem)] flex flex-col justify-between overflow-hidden p-2 sm:p-3 gap-2 select-none"
+      className="w-full max-w-5xl mx-auto min-h-0 h-full max-h-[calc(100vh-3.5rem)] flex flex-col justify-between overflow-y-auto sm:overflow-hidden p-2 sm:p-3 gap-2 select-none"
     >
       {/* Header Bar */}
-      <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-card/75 border border-border/60 backdrop-blur-md shadow-sm flex-shrink-0">
+      <div className="flex flex-wrap sm:flex-nowrap items-center justify-between px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-card/75 border border-border/60 backdrop-blur-md shadow-sm gap-2 flex-shrink-0">
         <div className="flex items-center gap-2 min-w-0">
-          <Trophy className="w-6 h-6 text-amber-400 flex-shrink-0" />
+          <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-amber-400 flex-shrink-0" />
           <div className="min-w-0">
-            <h2 className="text-sm sm:text-base font-bold leading-tight truncate">
+            <h2 className="text-xs sm:text-base font-bold leading-tight truncate">
               Challenge Complete!
             </h2>
-            <p className="text-[11px] text-muted-foreground">{feedback.message}</p>
+            <p className="text-[10px] sm:text-[11px] text-muted-foreground truncate">{feedback.message}</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className="px-2.5 py-0.5 rounded-lg bg-secondary text-foreground text-xs font-bold flex items-center gap-1.5">
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+          <div className="px-2 py-0.5 rounded-lg bg-secondary text-foreground text-xs font-bold flex items-center gap-1">
             <span>Score:</span>
-            <span className={`text-lg font-black ${feedback.color}`}>{totalScore}%</span>
+            <span className={`text-base sm:text-lg font-black ${feedback.color}`}>{totalScore}%</span>
             <Badge variant="outline" className="text-[10px] hidden sm:inline-flex">{feedback.label}</Badge>
           </div>
           <Button
             size="sm"
             onClick={onGoHome}
             variant="secondary"
-            className="h-8 text-xs font-semibold px-3"
+            className="h-8 text-xs font-semibold px-2.5 sm:px-3"
           >
-            <Home className="w-3.5 h-3.5 mr-1" />
-            Home
+            <Home className="w-3.5 h-3.5 sm:mr-1" />
+            <span className="hidden xs:inline">Home</span>
           </Button>
         </div>
       </div>
 
       {/* 2-Column Dashboard Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 flex-1 min-h-0 items-stretch overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 flex-1 min-h-0 items-stretch overflow-y-auto sm:overflow-hidden">
         {/* Left Column: AI Coach Audio Debrief & Health Benefits */}
         <div className="flex flex-col gap-2 h-full overflow-y-auto">
           {/* AI Coach Audio Debrief */}
@@ -264,34 +264,34 @@ export function FinalSummary({ levelScores, levelFeedbacks, levelDetails, poseLi
       </div>
 
       {/* Bottom Action Footer */}
-      <div className="flex items-center justify-center gap-2 flex-shrink-0 pt-0.5">
+      <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 flex-shrink-0 pt-0.5">
         <Button
           onClick={() => downloadJpgReport()}
           size="sm"
-          className="h-8 text-xs gap-1.5 px-3 font-semibold"
+          className="h-8 text-xs gap-1 sm:gap-1.5 px-2.5 sm:px-3 font-semibold"
         >
           <Download className="w-3.5 h-3.5" />
-          Download JPG
+          <span>JPG</span>
         </Button>
 
         <Button
           onClick={() => downloadPdfReport()}
           size="sm"
           variant="outline"
-          className="h-8 text-xs gap-1.5 px-3 font-semibold"
+          className="h-8 text-xs gap-1 sm:gap-1.5 px-2.5 sm:px-3 font-semibold"
         >
           <FileText className="w-3.5 h-3.5" />
-          Download PDF
+          <span>PDF</span>
         </Button>
 
         <Button
           onClick={onGoHome}
           size="sm"
           variant="secondary"
-          className="h-8 text-xs gap-1.5 px-4 font-semibold"
+          className="h-8 text-xs gap-1 sm:gap-1.5 px-3 sm:px-4 font-semibold"
         >
           <Home className="w-3.5 h-3.5" />
-          Home
+          <span>Home</span>
         </Button>
       </div>
     </motion.div>

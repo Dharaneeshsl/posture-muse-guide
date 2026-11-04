@@ -55,40 +55,40 @@ export function SessionSummary({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="w-full max-w-5xl mx-auto h-full max-h-[calc(100vh-3.5rem)] flex flex-col justify-between overflow-hidden p-2 sm:p-3 gap-2 select-none"
+      className="w-full max-w-5xl mx-auto min-h-0 h-full max-h-[calc(100vh-3.5rem)] flex flex-col justify-between overflow-y-auto sm:overflow-hidden p-2 sm:p-3 gap-2 select-none"
     >
       {/* Compact Header Bar */}
-      <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-card/75 border border-border/60 backdrop-blur-md shadow-sm flex-shrink-0">
+      <div className="flex flex-wrap sm:flex-nowrap items-center justify-between px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-card/75 border border-border/60 backdrop-blur-md shadow-sm gap-2 flex-shrink-0">
         <div className="flex items-center gap-2 min-w-0">
-          <CheckCircle2 className="w-6 h-6 text-emerald-500 flex-shrink-0" />
+          <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500 flex-shrink-0" />
           <div className="min-w-0">
-            <h2 className="text-sm sm:text-base font-bold leading-tight truncate">
-              Level {level} Complete: {poseName}
+            <h2 className="text-xs sm:text-base font-bold leading-tight truncate">
+              Lvl {level}: {poseName}
             </h2>
-            <p className="text-[11px] text-muted-foreground">Session Performance Breakdown</p>
+            <p className="text-[10px] sm:text-[11px] text-muted-foreground">Session Performance Breakdown</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Badge className={`text-xs px-2.5 py-0.5 font-bold ${getGradeColor(grade)}`}>
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+          <Badge className={`text-[10px] sm:text-xs px-2 sm:px-2.5 py-0.5 font-bold ${getGradeColor(grade)}`}>
             {grade}
           </Badge>
-          <div className="px-2.5 py-0.5 rounded-lg bg-secondary text-foreground text-xs font-bold">
-            Score: <span className="text-emerald-500 font-extrabold text-sm ml-1">{calculatedOverall}%</span>
+          <div className="px-2 py-0.5 rounded-lg bg-secondary text-foreground text-[11px] sm:text-xs font-bold">
+            Score: <span className="text-emerald-500 font-extrabold text-xs sm:text-sm ml-0.5">{calculatedOverall}%</span>
           </div>
           <Button
             size="sm"
             onClick={onNextLevel}
-            className="h-8 text-xs font-semibold px-3 shadow"
+            className="h-8 text-xs font-semibold px-2.5 sm:px-3 shadow"
           >
             {isLastLevel ? (
               <>
                 <Trophy className="w-3.5 h-3.5 mr-1 text-amber-300" />
-                View Final Summary
+                <span>Final</span>
               </>
             ) : (
               <>
-                Next Level
+                <span>Next</span>
                 <ArrowRight className="w-3.5 h-3.5 ml-1" />
               </>
             )}
@@ -97,7 +97,7 @@ export function SessionSummary({
       </div>
 
       {/* 2-Column Balanced Dashboard */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 flex-1 min-h-0 items-stretch overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 flex-1 min-h-0 items-stretch overflow-y-auto sm:overflow-hidden">
         {/* Left Column: Performance Metrics & AI Coach Audio Debrief */}
         <div className="flex flex-col gap-2 h-full overflow-y-auto">
           {/* 3 Metric Stat Tiles */}

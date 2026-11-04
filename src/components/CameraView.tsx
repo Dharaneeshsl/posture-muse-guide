@@ -196,6 +196,7 @@ export function CameraView({ isActive, onPoseDetected }: CameraViewProps) {
         className="w-full h-full object-cover"
         playsInline
         muted
+        autoPlay
       />
       <canvas
         ref={canvasRef}
