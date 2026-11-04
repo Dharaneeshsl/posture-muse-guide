@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle2, ArrowRight, Trophy } from "lucide-react";
 import { motion } from "framer-motion";
 import BenefitsCard, { PoseBenefitItem } from "./BenefitsCard";
+import { GeminiAudioDebrief } from "./GeminiAudioDebrief";
 
 interface SessionSummaryProps {
   poseName: string;
@@ -124,6 +125,22 @@ export function SessionSummary({
           <div className="text-sm text-muted-foreground mt-2">Calculated from accuracy, stability, and symmetry</div>
         </CardContent>
       </Card>
+
+      {/* AI Coach Audio Debrief for completed pose */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.52 }}
+      >
+        <GeminiAudioDebrief
+          metrics={{
+            totalScore: calculatedOverall,
+            levelScores: [calculatedOverall],
+            feedbacks: [feedback],
+            levelDetails: [{ level, slug: poseSlug || "", name: poseName, difficulty: grade }]
+          }}
+        />
+      </motion.div>
 
       {/* Benefits Card */}
       <motion.div

@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { jsPDF } from "jspdf";
 import { generateReportCanvas } from "@/lib/reportGenerator";
 import BenefitsCard, { PoseBenefitItem } from "./BenefitsCard";
+import { GeminiAudioDebrief } from "./GeminiAudioDebrief";
 
 interface FinalSummaryProps {
   levelScores: number[];
@@ -206,6 +207,16 @@ export function FinalSummary({ levelScores, levelFeedbacks, levelDetails, poseLi
           </p>
         </CardContent>
       </Card>
+
+      {/* AI Coach Audio Debrief (Powered by Gemini API) */}
+      <GeminiAudioDebrief
+        metrics={{
+          totalScore,
+          levelScores,
+          feedbacks,
+          levelDetails
+        }}
+      />
 
       {/* Level Breakdown */}
       <Card>

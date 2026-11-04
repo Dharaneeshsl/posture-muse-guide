@@ -17,7 +17,9 @@ import {
 } from "@/utils/scoring";
 import { stabilityScore } from "@/utils/angles";
 import { NormalizedLandmark } from "@mediapipe/tasks-vision";
-import { Play, RotateCcw, SkipForward, Volume2, VolumeX } from "lucide-react";
+import { Play, RotateCcw, SkipForward, Volume2, VolumeX, Mic, MicOff, Wind, Sparkles } from "lucide-react";
+import { PranayamaGuide } from "./PranayamaGuide";
+import { useVoiceCommands } from "@/hooks/useVoiceCommands";
 import LevelCompleteOverlay from "./LevelCompleteOverlay";
 
 interface PoseData {
@@ -109,6 +111,21 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
   const [showFinalSummary, setShowFinalSummary] = useState(false);
   const [levelScores, setLevelScores] = useState<number[]>(Array(challengeLevels.length).fill(0));
   const [levelFeedbacks, setLevelFeedbacks] = useState<string[][]>(() => Array.from({ length: challengeLevels.length }, () => []));
+  const [showPranayama, setShowPranayama] = useState(true);
+  const [voiceCommandsEnabled, setVoiceCommandsEnabled] = useState(true);
+  const [voiceToast, setVoiceToast] = useState<string | null>(null);
+  const [isMusicMuted, setIsMusicMuted] = useState(false);
+  const voiceToastTimerRef = useRef<number | null>(null);
+
+  const showVoiceToast = useCallback((msg: string) => {
+    setVoiceToast(msg);
+    if (voiceToastTimerRef.current) {
+      window.clearTimeout(voiceToastTimerRef.current);
+    }
+    voiceToastTimerRef.current = window.setTimeout(() => {
+      setVoiceToast(null);
+    }, 2800);
+  }, []);
   
   const frameScoresRef = useRef<FrameScore[]>([]);
   const angleTimeSeriesRef = useRef<Record<string, number[]>>({});
@@ -156,7 +173,99 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
     }
   }, []);
 
-  const safePauseAudio = useCallback(() => {
+    const handleCheckFormVoice = useCallback(() => {
+    if (!cameraActive) {
+      speakVoice("Please start your camera first.", true);
+      return;
+    }
+    if (!isHolding) {
+      speakVoice("You can say begin or click begin when ready to start holding.", true);
+      return;
+    }
+    if (liveFeedback && liveFeedback.length > 0) {
+      const topHint = liveFeedback[0].replace(/≈/g, 'about ').replace(/°/g, ' degrees');
+      speakVoice(`Form check: ${topHint}`, true);
+    } else if (liveSimilarity >= 75) {
+      speakVoice(`Excellent alignment! Similarity is ${liveSimilarity} percent. Maintain your steady breath.`, true);
+    } else {
+      speakVoice(`Hold steady! Similarity is ${liveSimilarity} percent. Focus on centering your posture.`, true);
+    }
+  }, [cameraActive, isHolding, liveFeedback, liveSimilarity]);
+
+  const {
+    isSupported: isVoiceSupported,
+    isListening: isVoiceListening
+  } = useVoiceCommands({
+    enabled: voiceCommandsEnabled,
+    handlers: {
+      onBegin: () => {
+        if (!cameraActive) {
+          setCameraActive(true);
+          setTimeout(() => handleBegin(), 800);
+        } else if (!isHolding && !isCountingDown) {
+          handleBegin();
+        }
+        showVoiceToast("Begin Pose");
+      },
+      onNext: () => {
+        handleNextLevel();
+        showVoiceToast("Next Pose");
+      },
+      onSkip: () => {
+        handleSkipLevel();
+        showVoiceToast("Skip Pose");
+      },
+      onReset: () => {
+        resetLevel();
+        showVoiceToast("Reset Pose");
+      },
+      onCheckForm: () => {
+        handleCheckFormVoice();
+        showVoiceToast("Checking Form...");
+      },
+      onTogglePranayama: () => {
+        setShowPranayama(prev => !prev);
+        showVoiceToast("Pranayama Breath");
+      },
+      onMuteMusic: () => {
+        setIsMusicMuted(true);
+        safePauseAudio();
+        showVoiceToast("Mute Music");
+      },
+      onPlayMusic: () => {
+        setIsMusicMuted(false);
+        if (isHolding) safePlayAudio();
+        showVoiceToast("Play Music");
+      },
+      onToggleMusic: () => {
+        setIsMusicMuted(prev => {
+          const next = !prev;
+          if (next) safePauseAudio();
+          else if (isHolding) safePlayAudio();
+          return next;
+        });
+        showVoiceToast("Toggle Music");
+      },
+      onPause: () => {
+        if (isHolding) {
+          setIsHolding(false);
+          safePauseAudio();
+          showVoiceToast("Pause");
+          speakVoice("Pose paused", true);
+        }
+      },
+      onResume: () => {
+        if (!isHolding && cameraActive) {
+          setIsHolding(true);
+          if (!isMusicMuted) safePlayAudio();
+          showVoiceToast("Resume");
+          speakVoice("Resuming pose", true);
+        }
+      }
+    }
+  });
+
+const safePauseAudio = useCallback(() => {
     if (!audioRef.current) return;
     const audio = audioRef.current;
     if (audioPlayPromiseRef.current) {
@@ -596,6 +705,23 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
         </Badge>
       </div>
 
+      {/* Hands-Free Voice Prompts Guide */}
+      {voiceCommandsEnabled && isVoiceSupported && (
+        <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-2 rounded-xl bg-slate-900/40 border border-border/50 text-xs text-muted-foreground backdrop-blur-sm">
+          <div className="flex items-center gap-1.5 font-medium text-foreground">
+            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+            <span>Hands-Free Commands:</span>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {['"Begin"', '"How is my form?"', '"Next pose"', '"Skip"', '"Mute music"', '"Breathe"'].map((cmd, i) => (
+              <span key={i} className="px-2 py-0.5 rounded-md bg-secondary/60 text-secondary-foreground text-[11px] font-mono">
+                {cmd}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Camera Feed Card */}
@@ -620,6 +746,17 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
 
             {isHolding && (
               <Progress value={holdProgress} className="h-2" />
+            )}
+
+            {/* Synchronized Pranayama (Breath-Pacing Guidance) */}
+            {showPranayama && (
+              <div className="mt-3">
+                <PranayamaGuide
+                  compact={true}
+                  initiallyActive={true}
+                  onToggleActive={setShowPranayama}
+                />
+              </div>
             )}
 
             {/* Live feedback (glass card) */}
