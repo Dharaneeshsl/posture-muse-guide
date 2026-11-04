@@ -646,7 +646,7 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
               >
                 {voiceCoachEnabled ? (
                   <>
-                    <Volume2 className="w-4 h-4 mr-1.5 text-emerald-400" />
+                    <Volume2 className="w-4 h-4 mr-1.5 text-emerald-600 dark:text-emerald-400" />
                     <span className="text-xs">Voice: On</span>
                   </>
                 ) : (

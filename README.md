@@ -15,6 +15,7 @@
 
 **Pose Perfect** is an intelligent, privacy-first computer vision web application that transforms any webcam into a personal yoga instructor. Built with Google's **MediaPipe Pose Landmarker**, Pose Perfect tracks 33 3D skeletal landmarks in real time, computes anatomical joint angles, and delivers instant, spoken feedback alongside precision visual guidance.
 
+
 All computer vision inference runs **100% locally in your browser** — no camera streams, images, or personal video data are ever uploaded to any external server or cloud service.
 
 ---

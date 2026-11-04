@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { PoseCard } from "@/components/PoseCard";
 import { ChallengeFlow } from "@/components/ChallengeFlow";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Trophy, Library, Sparkles } from "lucide-react";
+import { Trophy, Library, Sparkles, Sun, Moon } from "lucide-react";
 import { motion } from "framer-motion";
 
 interface PoseData {
@@ -31,6 +31,22 @@ const Index = () => {
   const [posesData, setPosesData] = useState<PosesJson | null>(null);
   const [selectedPose, setSelectedPose] = useState<string | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    return (localStorage.getItem("theme") as "light" | "dark") || "light";
+  });
+
+  useEffect(() => {
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "light" ? "dark" : "light"));
+  };
 
   const loadPoses = () => {
     setLoadError(null);
@@ -73,7 +89,18 @@ const Index = () => {
 
   if (view === "landing") {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20 flex items-center justify-center p-4 relative">
+        <div className="absolute top-6 right-6">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={toggleTheme}
+            className="rounded-full w-10 h-10 shadow-sm"
+            title={`Switch to ${theme === "light" ? "Dark" : "Light"} theme`}
+          >
+            {theme === "light" ? <Moon className="w-5 h-5 text-slate-700" /> : <Sun className="w-5 h-5 text-amber-400" />}
+          </Button>
+        </div>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -81,13 +108,29 @@ const Index = () => {
           className="max-w-3xl w-full text-center space-y-8"
         >
           {/* Hero Section */}
-          <div className="space-y-4">
+          <div className="space-y-6">
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.2, duration: 0.5 }}
+              transition={{ delay: 0.1, duration: 0.5 }}
+              className="flex justify-center"
             >
-              <h1 className="text-6xl font-bold text-foreground tracking-tight">
+              <div className="relative group">
+                <div className="absolute -inset-2 bg-gradient-to-r from-emerald-500 to-teal-400 rounded-3xl blur-xl opacity-30 group-hover:opacity-50 transition duration-500" />
+                <img
+                  src="/1000130175-Picsart-AiImageEnhancer.png"
+                  alt="Pose Perfect Logo"
+                  className="relative w-32 h-32 md:w-36 md:h-36 object-contain rounded-3xl shadow-xl border border-emerald-500/20 bg-card/80 backdrop-blur-md p-2 transition-transform duration-300 group-hover:scale-105"
+                />
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 0.25, duration: 0.5 }}
+            >
+              <h1 className="text-5xl md:text-6xl font-bold text-foreground tracking-tight">
                 Pose Perfect
               </h1>
             </motion.div>
@@ -183,13 +226,23 @@ const Index = () => {
     return (
       <div className="min-h-screen bg-background p-4 md:p-8">
         <div className="max-w-7xl mx-auto">
-          <Button
-            variant="ghost"
-            onClick={() => { setView(isSinglePractice ? "main" : "landing"); setSelectedPose(null); }}
-            className="mb-6"
-          >
-            ← Back
-          </Button>
+          <div className="flex items-center justify-between mb-6">
+            <Button
+              variant="ghost"
+              onClick={() => { setView(isSinglePractice ? "main" : "landing"); setSelectedPose(null); }}
+            >
+              ← Back
+            </Button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={toggleTheme}
+              className="rounded-full w-9 h-9"
+              title={`Switch to ${theme === "light" ? "Dark" : "Light"} theme`}
+            >
+              {theme === "light" ? <Moon className="w-4 h-4 text-slate-700" /> : <Sun className="w-4 h-4 text-amber-400" />}
+            </Button>
+          </div>
 
           <ChallengeFlow
             challengeLevels={challengeLevelsToUse}
@@ -210,11 +263,27 @@ const Index = () => {
       {/* Header */}
       <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Pose Perfect</h1>
-            <p className="text-sm text-muted-foreground">Master your yoga practice</p>
+          <div className="flex items-center gap-3">
+            <img
+              src="/1000130175-Picsart-AiImageEnhancer.png"
+              alt="Pose Perfect Logo"
+              className="w-10 h-10 object-contain rounded-xl border border-emerald-500/20 shadow-sm bg-card/80 p-0.5"
+            />
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Pose Perfect</h1>
+              <p className="text-sm text-muted-foreground">Master your yoga practice</p>
+            </div>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={toggleTheme}
+              className="rounded-full w-9 h-9"
+              title={`Switch to ${theme === "light" ? "Dark" : "Light"} theme`}
+            >
+              {theme === "light" ? <Moon className="w-4 h-4 text-slate-700" /> : <Sun className="w-4 h-4 text-amber-400" />}
+            </Button>
             <Button variant="outline" onClick={() => setView("challenge")}>
               <Trophy className="w-4 h-4 mr-2" />
               Challenge
