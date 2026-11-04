@@ -7,6 +7,13 @@
 ### **Master the Pose. Pose Yourself.**
 *Next-generation, real-time AI yoga posture coach powered by on-device computer vision and natural voice guidance.*
 
+[![CI/CD Pipeline](https://github.com/Dharaneeshsl/posture-muse-guide/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/Dharaneeshsl/posture-muse-guide/actions/workflows/ci-cd.yml)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18.3-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-7.3-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![MediaPipe](https://img.shields.io/badge/Google_MediaPipe-Tasks_Vision-FF6F00?logo=google&logoColor=white)](https://developers.google.com/mediapipe)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+
 </div>
 
 ---
