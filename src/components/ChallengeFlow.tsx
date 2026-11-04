@@ -908,109 +908,53 @@ const safePauseAudio = useCallback(() => {
             </AnimatePresence>
           </div>
 
-          {/* Right: Yoga Pose Reference Screen */}
-          <div className="relative w-full h-full min-h-[170px] rounded-2xl overflow-hidden bg-card/80 border border-border/60 shadow-lg flex items-stretch">
-            {/* Mobile View (< md): Full Image with Toggleable Steps Overlay */}
-            <div className="md:hidden relative w-full h-full bg-slate-950/40 p-1 flex items-center justify-center overflow-hidden">
+          {/* Right: Yoga Pose Reference Screen (Top: Photo, Bottom: Words) */}
+          <div className="relative w-full h-full min-h-[170px] rounded-2xl overflow-hidden bg-card/85 border border-border/60 shadow-lg flex flex-col items-stretch">
+            {/* Top: Model Pose Photo */}
+            <div className="flex-1 min-h-0 relative bg-slate-950/50 p-2 sm:p-3 flex items-center justify-center overflow-hidden">
               <img
                 src={currentPose.thumbnail}
                 alt={currentPose.name}
-                className="w-full h-full max-h-full object-contain rounded-lg"
+                className="w-full h-full max-h-full object-contain rounded-xl"
               />
-              <div className="absolute bottom-2 left-2 px-1.5 py-0.5 rounded bg-black/75 backdrop-blur-md text-[9px] font-semibold text-white">
+              <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-md bg-black/80 backdrop-blur-md text-[10px] sm:text-xs font-semibold text-white shadow border border-white/10">
                 Target Pose
               </div>
-              <button
-                onClick={() => setShowMobileSteps(p => !p)}
-                className="absolute top-2 right-2 z-20 flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/75 backdrop-blur-md text-[10px] font-semibold text-white/95 border border-white/20 active:scale-95 transition-transform"
-                title="Toggle Form Steps & Tips"
-              >
-                <Info className="w-3 h-3 text-cyan-400" />
-                <span>{showMobileSteps ? "Hide" : "Steps"}</span>
-              </button>
-
-              {/* Animated Steps & Tips Overlay for Mobile */}
-              <AnimatePresence>
-                {showMobileSteps && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    className="absolute inset-1 z-30 rounded-lg bg-card/95 backdrop-blur-md p-2.5 overflow-y-auto flex flex-col justify-between text-xs border border-border"
-                  >
-                    <div className="flex items-center justify-between pb-1 border-b border-border/50">
-                      <span className="font-bold text-foreground text-xs">Form Steps & Tips</span>
-                      <button
-                        onClick={() => setShowMobileSteps(false)}
-                        className="p-1 rounded-md text-muted-foreground hover:text-foreground"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-
-                    <div className="space-y-1.5 my-1">
-                      <div className="font-semibold text-foreground text-[11px]">Key Steps:</div>
-                      <ol className="text-muted-foreground space-y-1 list-decimal list-inside text-[10px] leading-tight">
-                        {currentPose.steps.slice(0, 3).map((step, idx) => (
-                          <li key={idx} className="line-clamp-2">{step}</li>
-                        ))}
-                      </ol>
-                    </div>
-
-                    <div className="space-y-1 pt-1 border-t border-border/40">
-                      <div className="font-semibold text-foreground text-[11px]">Tips:</div>
-                      <ul className="text-muted-foreground space-y-0.5 list-disc list-inside text-[10px] leading-tight">
-                        {currentPose.tips.slice(0, 2).map((tip, idx) => (
-                          <li key={idx} className="line-clamp-2">{tip}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </div>
 
-            {/* Desktop View (>= md): Split 50/50 Image & Steps */}
-            <div className="hidden md:flex flex-row w-full h-full items-stretch">
-              {/* Left Portion: Model Pose Image */}
-              <div className="w-1/2 h-full relative bg-slate-950/40 p-3 sm:p-4 flex items-center justify-center overflow-hidden">
-                <img
-                  src={currentPose.thumbnail}
-                  alt={currentPose.name}
-                  className="w-full h-full max-h-full object-contain rounded-xl"
-                />
-                <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-md bg-black/80 backdrop-blur-md text-xs font-semibold text-white shadow">
-                  Target Pose
-                </div>
-              </div>
-
-              {/* Right Portion: Key Steps & Tips */}
-              <div className="w-1/2 h-full p-4 sm:p-5 flex flex-col justify-between text-xs sm:text-sm border-l border-border/40 overflow-y-auto">
-                <div className="space-y-2">
-                  <div className="font-bold text-foreground text-sm flex items-center gap-1.5 border-b border-border/40 pb-1.5">
+            {/* Bottom: Words (Key Form Steps & Alignment Tips) */}
+            <div className="flex-shrink-0 p-2.5 sm:p-3.5 bg-card/95 border-t border-border/50 flex flex-col gap-1.5 sm:gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm">
+                {/* Column 1: Key Form Steps */}
+                <div className="space-y-1 sm:space-y-1.5 min-w-0">
+                  <div className="font-bold text-foreground text-xs sm:text-sm flex items-center gap-1.5 border-b border-border/40 pb-1">
+                    <span className="text-emerald-500 font-extrabold">✓</span>
                     <span>Key Form Steps</span>
                   </div>
-                  <ol className="text-muted-foreground space-y-1.5 list-decimal list-inside text-xs sm:text-sm leading-relaxed">
-                    {currentPose.steps.slice(0, 4).map((step, idx) => (
+                  <ol className="text-muted-foreground space-y-0.5 sm:space-y-1 list-decimal list-inside text-[11px] sm:text-xs leading-snug">
+                    {currentPose.steps.slice(0, 3).map((step, idx) => (
                       <li key={idx} className="line-clamp-2">{step}</li>
                     ))}
                   </ol>
                 </div>
 
-                <div className="space-y-2 pt-2 border-t border-border/40">
-                  <div className="font-bold text-foreground text-sm flex items-center gap-1.5">
+                {/* Column 2: Alignment Tips */}
+                <div className="space-y-1 sm:space-y-1.5 min-w-0">
+                  <div className="font-bold text-foreground text-xs sm:text-sm flex items-center gap-1.5 border-b border-border/40 pb-1">
+                    <span className="text-cyan-400 font-extrabold">•</span>
                     <span>Alignment Tips</span>
                   </div>
-                  <ul className="text-muted-foreground space-y-1.5 list-disc list-inside text-xs sm:text-sm leading-relaxed">
-                    {currentPose.tips.slice(0, 3).map((tip, idx) => (
+                  <ul className="text-muted-foreground space-y-0.5 sm:space-y-1 list-disc list-inside text-[11px] sm:text-xs leading-snug">
+                    {currentPose.tips.slice(0, 2).map((tip, idx) => (
                       <li key={idx} className="line-clamp-2">{tip}</li>
                     ))}
                   </ul>
                 </div>
+              </div>
 
-                <div className="text-xs text-muted-foreground/80 italic pt-1 text-center">
-                  Breathe deeply and engage your core throughout the hold
-                </div>
+              {/* Subtle Breathing Reminder */}
+              <div className="text-[10px] sm:text-xs text-muted-foreground/80 italic text-center pt-0.5 border-t border-border/30">
+                Breathe deeply and engage your core throughout the hold
               </div>
             </div>
           </div>
