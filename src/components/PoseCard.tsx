@@ -34,7 +34,7 @@ export function PoseCard({ name, difficulty, thumbnail, short, onSelect }: PoseC
         <img
           src={imgSrc}
           alt={name}
-          onError={() => setImgSrc("/placeholder.svg")}
+          onError={() => { if (imgSrc !== "/placeholder.svg") setImgSrc("/placeholder.svg"); }}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
       </div>

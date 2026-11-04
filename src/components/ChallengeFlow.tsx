@@ -45,8 +45,13 @@ const MOTIVATIONAL_LINES = [
 const speakVoice = (text: string, priority: boolean = false) => {
   if (typeof window === "undefined" || !("speechSynthesis" in window)) return;
   try {
+    if (window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+    }
     if (priority || !window.speechSynthesis.speaking) {
-      window.speechSynthesis.cancel();
+      if (priority) {
+        window.speechSynthesis.cancel();
+      }
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.rate = 1.05;
       utterance.pitch = 1.0;
@@ -64,7 +69,17 @@ const speakVoice = (text: string, priority: boolean = false) => {
       if (preferredVoice) {
         utterance.voice = preferredVoice;
       }
-      window.speechSynthesis.speak(utterance);
+      // Deferral ensures Chrome/Edge voice queue resets reliably after cancel()
+      setTimeout(() => {
+        try {
+          if (window.speechSynthesis.paused) {
+            window.speechSynthesis.resume();
+          }
+          window.speechSynthesis.speak(utterance);
+        } catch (e) {
+          console.warn("Speech playback error:", e);
+        }
+      }, 20);
     }
   } catch (err) {
     console.warn("Speech synthesis error:", err);
@@ -335,8 +350,8 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
       ? Math.round((allStabilities.reduce((a, b) => a + b, 0) / allStabilities.length) * 100)
       : 0;
 
-    const sessionScore = computeSessionScore(frameScoresRef.current, avgStability / 100);
-    const grade = scoreToGrade(sessionScore);
+    const percent = Math.round((accuracy + avgStability + symmetry) / 3);
+    const grade = scoreToGrade(percent);
     const feedback = lastFrame
       ? generateFeedback(
           similarityScore(lastFrame.angles, currentPose.targetAngles, currentPose.tolerances, currentPose.weights).deviations,
@@ -345,32 +360,22 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
         )
       : [];
 
-  setSessionData({
+    setSessionData({
       accuracy,
       stability: avgStability,
       symmetry,
       grade,
       feedback,
-      // Compute a robust overall score out of 100.
-      // Compute a robust overall score on a 0-10 scale.
-      // Prefer the session-based computation (scaled to 0-10), but fall back to
-      // a simple average of accuracy/stability/symmetry scaled to 0-10 if data is sparse.
-  // Use per-level score formula (0-10 scale): round((accuracy + stability + symmetry) / 30)
-  overallScore: Math.round((accuracy + avgStability + symmetry) / 3)
+      overallScore: percent
     });
 
-    // Show completion overlay for 3s then show the summary page
-    const percent = Math.round((accuracy + avgStability + symmetry) / 3);
+    // Show completion overlay (LevelCompleteOverlay manages its own 3s timer and triggers onDone)
     setOverlayPercent(percent);
     setOverlayGrade(grade);
     setOverlayVisible(true);
     if (voiceCoachEnabledRef.current) {
       speakVoice(`Great job! Pose complete! Grade: ${grade}`, true);
     }
-    setTimeout(() => {
-      setOverlayVisible(false);
-      setShowSummary(true);
-    }, 3000);
     // Pause and reset music when the exercise completes
     try {
       if (audioRef.current) {
@@ -481,7 +486,16 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
     setShowFinalSummary(true);
   }, [currentLevel, resetLevel, sessionData, levelScores, levelFeedbacks]);
 
-  if (!currentPose) return null;
+  if (!currentPose) {
+    return (
+      <div className="flex flex-col items-center justify-center p-12 text-center space-y-4">
+        <p className="text-lg text-muted-foreground">Pose data could not be loaded.</p>
+        <Button onClick={onComplete} variant="outline">
+          Return
+        </Button>
+      </div>
+    );
+  }
 
   if (showFinalSummary) {
     return (
