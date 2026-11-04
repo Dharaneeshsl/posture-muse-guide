@@ -82,6 +82,8 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
   const [cameraActive, setCameraActive] = useState(false);
   const [isHolding, setIsHolding] = useState(false);
   const [countdown, setCountdown] = useState(3);
+  const [isCountingDown, setIsCountingDown] = useState(false);
+  const countdownIntervalRef = useRef<number | null>(null);
   const [holdProgress, setHoldProgress] = useState(0);
   const [liveSimilarity, setLiveSimilarity] = useState(0);
   const [liveFeedback, setLiveFeedback] = useState<string[]>([]);
@@ -253,6 +255,7 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
         const a = new Audio("/meditation-relax-yoga-music.mp3");
         a.loop = true;
         a.preload = "auto";
+        a.volume = 0.25;
         audioRef.current = a;
       } catch (err) {
         console.warn("Could not create audio element:", err);
@@ -324,7 +327,7 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
     // Compute final metrics
     const lastFrame = frameScoresRef.current[frameScoresRef.current.length - 1];
     const accuracy = lastFrame ? computeAccuracy(lastFrame.score) : 0;
-    const symmetry = lastFrame ? computeSymmetry(lastFrame.angles) : 0;
+    const symmetry = lastFrame ? computeSymmetry(lastFrame.angles, currentPose.targetAngles) : 0;
 
     // Compute stability from angle time series
     const allStabilities = Object.values(angleTimeSeriesRef.current).map(series => stabilityScore(series));
@@ -613,12 +616,12 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
               </Button>
               <Button
                 onClick={handleBegin}
-                disabled={!cameraActive || isHolding}
+                disabled={!cameraActive || isHolding || isCountingDown}
                 variant="default"
                 size="sm"
                 className="transition-transform hover:scale-105 active:scale-95"
               >
-                Begin ({countdown > 0 ? countdown : "Go!"})
+                {isCountingDown ? `Get Ready (${countdown})` : isHolding ? "Holding..." : "Begin Pose"}
               </Button>
               <Button
                 onClick={resetLevel}

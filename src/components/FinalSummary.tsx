@@ -213,7 +213,8 @@ export function FinalSummary({ levelScores, levelFeedbacks, levelDetails, poseLi
           <CardTitle>Level Breakdown</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-5 gap-4">
+          <div className={`grid gap-4 ${levelScores.length === 1 ? "grid-cols-1 max-w-xs mx-auto" : "grid-cols-2 sm:grid-cols-3 md:grid-cols-5"}`}>
+
             {levelScores.map((score, idx) => (
               <motion.div
                 key={idx}

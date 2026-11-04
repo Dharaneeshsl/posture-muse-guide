@@ -106,12 +106,18 @@ export function generateFeedback(
     
     const target = targetAngles[angleName];
     const current = userAngles[angleName];
-    const diff = Math.round(target - current);
     
     const jointLabel = angleName
       .replace(/_/g, " ")
       .replace(/angle/g, "")
       .trim();
+
+    if (current === undefined || isNaN(current)) {
+      hints.push(`Bring ${jointLabel} into view`);
+      continue;
+    }
+
+    const diff = Math.round(target - current);
     
     if (diff > 0) {
       hints.push(`Open ${jointLabel} by ≈${Math.abs(diff)}°`);
@@ -133,7 +139,7 @@ export function computeAccuracy(similarityScoreValue: number): number {
 /**
  * Compute symmetry percentage based on left/right angle pairs
  */
-export function computeSymmetry(userAngles: PoseAngles): number {
+export function computeSymmetry(userAngles: PoseAngles, targetAngles?: PoseAngles): number {
   const pairs = [
     ["left_shoulder_angle", "right_shoulder_angle"],
     ["left_elbow_angle", "right_elbow_angle"],
@@ -146,8 +152,13 @@ export function computeSymmetry(userAngles: PoseAngles): number {
   
   for (const [left, right] of pairs) {
     if (userAngles[left] !== undefined && userAngles[right] !== undefined) {
-      const diff = Math.abs(userAngles[left] - userAngles[right]);
-      const symmetry = Math.max(0, 1 - diff / 180);
+      const userDiff = Math.abs(userAngles[left] - userAngles[right]);
+      let symmetryError = userDiff;
+      if (targetAngles && targetAngles[left] !== undefined && targetAngles[right] !== undefined) {
+        const targetDiff = Math.abs(targetAngles[left] - targetAngles[right]);
+        symmetryError = Math.abs(userDiff - targetDiff);
+      }
+      const symmetry = Math.max(0, 1 - symmetryError / 180);
       totalSymmetry += symmetry;
       count++;
     }

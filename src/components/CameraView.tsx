@@ -14,6 +14,8 @@ export function CameraView({ isActive, onPoseDetected }: CameraViewProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const animationFrameRef = useRef<number | undefined>(undefined);
+  const onPoseDetectedRef = useRef(onPoseDetected);
+  onPoseDetectedRef.current = onPoseDetected;
 
   useEffect(() => {
     let isMounted = true;
@@ -74,6 +76,7 @@ export function CameraView({ isActive, onPoseDetected }: CameraViewProps) {
   useEffect(() => {
     if (!isActive || !poseLandmarker) return;
 
+    let isCancelled = false;
     let activeStream: MediaStream | null = null;
     const currentVideo = videoRef.current;
 
@@ -96,7 +99,8 @@ export function CameraView({ isActive, onPoseDetected }: CameraViewProps) {
 
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
-          videoRef.current.onloadedmetadata = () => {
+          const onLoaded = () => {
+            if (isCancelled) return;
             videoRef.current?.play().catch(e => console.warn("Video play error:", e));
             if (canvasRef.current && videoRef.current) {
               canvasRef.current.width = videoRef.current.videoWidth;
@@ -104,6 +108,12 @@ export function CameraView({ isActive, onPoseDetected }: CameraViewProps) {
             }
             detectPose();
           };
+
+          if (videoRef.current.readyState >= 1) {
+            onLoaded();
+          } else {
+            videoRef.current.onloadedmetadata = onLoaded;
+          }
         }
       } catch (error) {
         console.error("Error accessing camera:", error);
@@ -112,7 +122,7 @@ export function CameraView({ isActive, onPoseDetected }: CameraViewProps) {
     };
 
     const detectPose = () => {
-      if (!videoRef.current || !canvasRef.current || !poseLandmarker) return;
+      if (isCancelled || !videoRef.current || !canvasRef.current || !poseLandmarker) return;
 
       const video = videoRef.current;
       const canvas = canvasRef.current;
@@ -147,7 +157,7 @@ export function CameraView({ isActive, onPoseDetected }: CameraViewProps) {
         );
 
         const angles = extractAnglesFromLandmarks(landmarks);
-        onPoseDetected?.(angles, landmarks);
+        onPoseDetectedRef.current?.(angles, landmarks);
       }
 
       animationFrameRef.current = requestAnimationFrame(detectPose);
@@ -156,6 +166,7 @@ export function CameraView({ isActive, onPoseDetected }: CameraViewProps) {
     startCamera();
 
     return () => {
+      isCancelled = true;
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
@@ -166,7 +177,7 @@ export function CameraView({ isActive, onPoseDetected }: CameraViewProps) {
         currentVideo.srcObject = null;
       }
     };
-  }, [isActive, poseLandmarker, onPoseDetected]);
+  }, [isActive, poseLandmarker]);
 
   return (
     <div className="relative w-full h-full bg-black rounded-lg overflow-hidden">
