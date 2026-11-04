@@ -55,7 +55,7 @@ export function SessionSummary({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="w-full max-w-5xl mx-auto min-h-0 h-full max-h-[calc(100vh-3.5rem)] flex flex-col justify-between overflow-y-auto sm:overflow-hidden p-2 sm:p-3 gap-2 select-none"
+      className="w-full h-full flex-1 min-h-0 flex flex-col justify-between overflow-y-auto sm:overflow-hidden p-2 sm:p-3 md:p-3.5 gap-2 select-none"
     >
       {/* Compact Header Bar */}
       <div className="flex flex-wrap sm:flex-nowrap items-center justify-between px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl bg-card/75 border border-border/60 backdrop-blur-md shadow-sm gap-2 flex-shrink-0">

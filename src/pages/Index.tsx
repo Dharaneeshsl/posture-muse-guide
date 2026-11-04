@@ -224,40 +224,22 @@ const Index = () => {
       : posesData.challenge;
 
     return (
-      <div className="min-h-screen bg-background p-2 sm:p-4 md:p-6 overflow-x-hidden flex flex-col">
-        <div className="max-w-7xl w-full mx-auto flex-1 flex flex-col min-h-0">
-          <div className="flex items-center justify-between mb-2 sm:mb-4 flex-shrink-0">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => { setView(isSinglePractice ? "main" : "landing"); setSelectedPose(null); }}
-              className="h-8 px-2.5 text-xs sm:text-sm"
-            >
-              ← Back
-            </Button>
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={toggleTheme}
-              className="rounded-full w-8 h-8 sm:w-9 sm:h-9"
-              title={`Switch to ${theme === "light" ? "Dark" : "Light"} theme`}
-            >
-              {theme === "light" ? <Moon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-700" /> : <Sun className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" />}
-            </Button>
-          </div>
-
-          <div className="flex-1 min-h-0">
-            <ChallengeFlow
-              challengeLevels={challengeLevelsToUse}
-              poseLibrary={posesData.library}
-              onComplete={() => {
-                // after practice/challenge complete, return to appropriate view
-                setView(isSinglePractice ? "main" : "landing");
-                setSelectedPose(null);
-              }}
-            />
-          </div>
-        </div>
+      <div className="h-screen max-h-screen w-full overflow-hidden bg-background p-2 sm:p-3 md:p-3.5 flex flex-col select-none">
+        <ChallengeFlow
+          challengeLevels={challengeLevelsToUse}
+          poseLibrary={posesData.library}
+          onBack={() => {
+            setView(isSinglePractice ? "main" : "landing");
+            setSelectedPose(null);
+          }}
+          theme={theme}
+          toggleTheme={toggleTheme}
+          onComplete={() => {
+            // after practice/challenge complete, return to appropriate view
+            setView(isSinglePractice ? "main" : "landing");
+            setSelectedPose(null);
+          }}
+        />
       </div>
     );
   }
@@ -265,8 +247,8 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       {/* Header */}
-      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2.5 sm:py-4 flex items-center justify-between">
+      <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10 w-full">
+        <div className="w-full px-4 sm:px-6 md:px-8 py-2.5 sm:py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-3 min-w-0">
             <img
               src="/1000130175-Picsart-AiImageEnhancer.png"
@@ -310,7 +292,7 @@ const Index = () => {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
+      <main className="w-full px-4 sm:px-6 md:px-8 py-4 sm:py-6">
         <Tabs defaultValue="library" className="space-y-4 sm:space-y-6">
           <TabsList>
             <TabsTrigger value="library" className="text-xs sm:text-sm">

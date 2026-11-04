@@ -18,7 +18,7 @@ import {
 } from "@/utils/scoring";
 import { stabilityScore } from "@/utils/angles";
 import { NormalizedLandmark } from "@mediapipe/tasks-vision";
-import { Play, RotateCcw, SkipForward, Volume2, VolumeX, Mic, MicOff, Wind, Sparkles, CheckCircle2, LayoutGrid, Rows, Info, X } from "lucide-react";
+import { Play, RotateCcw, SkipForward, Volume2, VolumeX, Mic, MicOff, Wind, Sparkles, CheckCircle2, LayoutGrid, Rows, Info, X, Sun, Moon, ArrowLeft } from "lucide-react";
 import { PranayamaGuide } from "./PranayamaGuide";
 import { useVoiceCommands } from "@/hooks/useVoiceCommands";
 import LevelCompleteOverlay from "./LevelCompleteOverlay";
@@ -93,9 +93,12 @@ interface ChallengeFlowProps {
   challengeLevels: Array<{ level: number; slug: string; name: string; difficulty: string }>;
   poseLibrary: PoseData[];
   onComplete: () => void;
+  onBack?: () => void;
+  theme?: "light" | "dark";
+  toggleTheme?: () => void;
 }
 
-export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: ChallengeFlowProps) {
+export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete, onBack, theme, toggleTheme }: ChallengeFlowProps) {
   const [currentLevel, setCurrentLevel] = useState(0);
   const [cameraActive, setCameraActive] = useState(false);
   const [isHolding, setIsHolding] = useState(false);
@@ -710,21 +713,33 @@ const safePauseAudio = useCallback(() => {
 
   return (
     <>
-      <div className="w-full h-full max-h-[calc(100vh-3.5rem)] flex flex-col justify-between overflow-hidden gap-1.5 select-none">
+      <div className="w-full h-full flex-1 flex flex-col justify-between overflow-hidden gap-1.5 sm:gap-2 select-none">
         {/* Compact Single-Row Header HUD */}
-        <div className="flex items-center justify-between px-2 sm:px-3 py-1.5 rounded-xl bg-card/75 border border-border/60 backdrop-blur-md shadow-sm flex-shrink-0">
-          {/* Left: Level, Name, Difficulty & Mobile Layout Switcher */}
-          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+        <div className="flex items-center justify-between px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-card/80 border border-border/60 backdrop-blur-md shadow-sm flex-shrink-0 w-full">
+          {/* Left: Back button, Level, Name, Difficulty & Mobile Layout Switcher */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
+            {onBack && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onBack}
+                className="h-7 sm:h-8 px-2 sm:px-2.5 text-xs font-semibold text-muted-foreground hover:text-foreground flex-shrink-0"
+                title="Back to menu"
+              >
+                <ArrowLeft className="w-3.5 h-3.5 mr-1" />
+                <span>Back</span>
+              </Button>
+            )}
             <Badge variant="secondary" className="text-[11px] sm:text-xs px-1.5 sm:px-2 py-0.5 font-bold flex-shrink-0">
               Lvl {currentLevel + 1}/{challengeLevels.length}
             </Badge>
-            <h2 className="text-xs sm:text-base font-bold text-foreground truncate max-w-[95px] xs:max-w-[130px] sm:max-w-xs">
+            <h2 className="text-xs sm:text-base md:text-lg font-bold text-foreground truncate max-w-[100px] xs:max-w-[140px] sm:max-w-xs md:max-w-md">
               {currentPose.name}
             </h2>
-            <Badge variant="outline" className="text-[10px] hidden sm:inline-flex flex-shrink-0">
+            <Badge variant="outline" className="text-[10px] sm:text-xs hidden sm:inline-flex flex-shrink-0">
               {currentPose.difficulty}
             </Badge>
-            <span className="text-xs text-muted-foreground hidden md:inline flex-shrink-0">
+            <span className="text-xs text-muted-foreground hidden md:inline flex-shrink-0 font-medium">
               ⏱️ {holdDuration}s
             </span>
             {/* Mobile Layout Switcher: Split side-by-side or Stack */}
@@ -772,22 +787,33 @@ const safePauseAudio = useCallback(() => {
             </div>
           </div>
 
-          {/* Right: Metrics & Sound Controls */}
+          {/* Right: Metrics & Sound Controls & Theme */}
           <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-            <div className="text-[10px] sm:text-xs font-semibold px-1.5 sm:px-2 py-0.5 rounded-md bg-secondary text-foreground">
+            <div className="text-[11px] sm:text-xs font-semibold px-2 sm:px-2.5 py-1 rounded-lg bg-secondary text-foreground">
               Hold: <span className="text-primary font-bold">{Math.round(holdProgress)}%</span>
             </div>
-            <div className="text-[10px] sm:text-xs font-semibold px-1.5 sm:px-2 py-0.5 rounded-md bg-secondary text-foreground">
+            <div className="text-[11px] sm:text-xs font-semibold px-2 sm:px-2.5 py-1 rounded-lg bg-secondary text-foreground">
               Match: <span className="text-accent font-bold">{liveSimilarity}%</span>
             </div>
+            {toggleTheme && (
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={toggleTheme}
+                className="rounded-full w-8 h-8 ml-0.5"
+                title={`Switch to ${theme === "light" ? "Dark" : "Light"} theme`}
+              >
+                {theme === "light" ? <Moon className="w-3.5 h-3.5 text-slate-700" /> : <Sun className="w-3.5 h-3.5 text-amber-400" />}
+              </Button>
+            )}
           </div>
         </div>
 
         {/* Main Content: Dual Visualizer (Camera Feed + Pose Reference) */}
-        {/* Calibrated height and responsive grid so user sees both clearly without scrolling */}
-        <div className={`grid ${mobileLayout === "side" ? "grid-cols-2" : "grid-cols-1"} md:grid-cols-2 gap-1.5 sm:gap-3 flex-1 min-h-0 items-stretch overflow-hidden`}>
+        {/* Dynamically expands to fill 100% of available height without gaps or scrolling */}
+        <div className={`grid ${mobileLayout === "side" ? "grid-cols-2" : "grid-cols-1"} md:grid-cols-2 gap-2 sm:gap-3 flex-1 min-h-0 items-stretch overflow-hidden w-full`}>
           {/* Left: User Camera Feed */}
-          <div className="relative w-full h-full min-h-[170px] sm:min-h-[220px] max-h-[360px] rounded-xl overflow-hidden bg-black border border-border/60 shadow-md flex items-center justify-center">
+          <div className="relative w-full h-full min-h-[170px] rounded-2xl overflow-hidden bg-black border border-border/60 shadow-lg flex items-center justify-center">
             <CameraView isActive={cameraActive} onPoseDetected={handlePoseDetected} />
 
             {/* Overlaid Voice Toast */}
@@ -883,13 +909,13 @@ const safePauseAudio = useCallback(() => {
           </div>
 
           {/* Right: Yoga Pose Reference Screen */}
-          <div className="relative w-full h-full min-h-[170px] sm:min-h-[220px] max-h-[360px] rounded-xl overflow-hidden bg-card/80 border border-border/60 shadow-md flex items-stretch">
+          <div className="relative w-full h-full min-h-[170px] rounded-2xl overflow-hidden bg-card/80 border border-border/60 shadow-lg flex items-stretch">
             {/* Mobile View (< md): Full Image with Toggleable Steps Overlay */}
             <div className="md:hidden relative w-full h-full bg-slate-950/40 p-1 flex items-center justify-center overflow-hidden">
               <img
                 src={currentPose.thumbnail}
                 alt={currentPose.name}
-                className="w-full h-full object-contain rounded-lg"
+                className="w-full h-full max-h-full object-contain rounded-lg"
               />
               <div className="absolute bottom-2 left-2 px-1.5 py-0.5 rounded bg-black/75 backdrop-blur-md text-[9px] font-semibold text-white">
                 Target Pose
@@ -947,43 +973,43 @@ const safePauseAudio = useCallback(() => {
             {/* Desktop View (>= md): Split 50/50 Image & Steps */}
             <div className="hidden md:flex flex-row w-full h-full items-stretch">
               {/* Left Portion: Model Pose Image */}
-              <div className="w-1/2 h-full relative bg-slate-950/40 p-1 flex items-center justify-center overflow-hidden">
+              <div className="w-1/2 h-full relative bg-slate-950/40 p-3 sm:p-4 flex items-center justify-center overflow-hidden">
                 <img
                   src={currentPose.thumbnail}
                   alt={currentPose.name}
-                  className="w-full h-full object-contain rounded-lg"
+                  className="w-full h-full max-h-full object-contain rounded-xl"
                 />
-                <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-black/75 backdrop-blur-md text-[10px] font-semibold text-white">
+                <div className="absolute bottom-3 left-3 px-2.5 py-1 rounded-md bg-black/80 backdrop-blur-md text-xs font-semibold text-white shadow">
                   Target Pose
                 </div>
               </div>
 
               {/* Right Portion: Key Steps & Tips */}
-              <div className="w-1/2 h-full p-2.5 sm:p-3 flex flex-col justify-between text-xs border-l border-border/40 overflow-y-auto">
-                <div className="space-y-1.5">
-                  <div className="font-bold text-foreground text-xs flex items-center gap-1 border-b border-border/40 pb-1">
+              <div className="w-1/2 h-full p-4 sm:p-5 flex flex-col justify-between text-xs sm:text-sm border-l border-border/40 overflow-y-auto">
+                <div className="space-y-2">
+                  <div className="font-bold text-foreground text-sm flex items-center gap-1.5 border-b border-border/40 pb-1.5">
                     <span>Key Form Steps</span>
                   </div>
-                  <ol className="text-muted-foreground space-y-1 list-decimal list-inside text-[11px] leading-tight">
-                    {currentPose.steps.slice(0, 3).map((step, idx) => (
+                  <ol className="text-muted-foreground space-y-1.5 list-decimal list-inside text-xs sm:text-sm leading-relaxed">
+                    {currentPose.steps.slice(0, 4).map((step, idx) => (
                       <li key={idx} className="line-clamp-2">{step}</li>
                     ))}
                   </ol>
                 </div>
 
-                <div className="space-y-1.5 pt-1 border-t border-border/40">
-                  <div className="font-bold text-foreground text-xs flex items-center gap-1">
+                <div className="space-y-2 pt-2 border-t border-border/40">
+                  <div className="font-bold text-foreground text-sm flex items-center gap-1.5">
                     <span>Alignment Tips</span>
                   </div>
-                  <ul className="text-muted-foreground space-y-1 list-disc list-inside text-[11px] leading-tight">
-                    {currentPose.tips.slice(0, 2).map((tip, idx) => (
+                  <ul className="text-muted-foreground space-y-1.5 list-disc list-inside text-xs sm:text-sm leading-relaxed">
+                    {currentPose.tips.slice(0, 3).map((tip, idx) => (
                       <li key={idx} className="line-clamp-2">{tip}</li>
                     ))}
                   </ul>
                 </div>
 
-                <div className="text-[10px] text-muted-foreground/80 italic pt-0.5 text-center">
-                  Aim for steady breath throughout the hold
+                <div className="text-xs text-muted-foreground/80 italic pt-1 text-center">
+                  Breathe deeply and engage your core throughout the hold
                 </div>
               </div>
             </div>
@@ -991,102 +1017,102 @@ const safePauseAudio = useCallback(() => {
         </div>
 
         {/* Bottom Guidance & Controls Bar (Always Visible, 0 Scrolling Needed) */}
-        <div className="flex flex-col gap-1 sm:gap-1.5 flex-shrink-0">
+        <div className="flex flex-col gap-1.5 sm:gap-2 flex-shrink-0 w-full">
           {/* Posture Guidance Row */}
-          <div className="px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-card/75 border border-border/50 flex items-center justify-between text-xs shadow-sm backdrop-blur-sm">
-            <div className="flex items-center min-w-0 mr-1.5 sm:mr-2">
-              <Sparkles className="w-3.5 h-3.5 text-purple-400 mr-1.5 sm:mr-2 flex-shrink-0" />
-              <span className="font-bold text-foreground mr-1 sm:mr-1.5 flex-shrink-0 text-[11px] sm:text-xs">Guidance:</span>
-              <span className="text-foreground/90 font-medium truncate text-[11px] sm:text-xs">
+          <div className="px-3 sm:px-4 py-2 rounded-xl bg-card/75 border border-border/50 flex items-center justify-between text-xs sm:text-sm shadow-sm backdrop-blur-sm">
+            <div className="flex items-center min-w-0 mr-2">
+              <Sparkles className="w-4 h-4 text-purple-400 mr-2 flex-shrink-0 animate-pulse" />
+              <span className="font-bold text-foreground mr-1.5 flex-shrink-0">Guidance:</span>
+              <span className="text-foreground/90 font-medium truncate">
                 {liveFeedback.length > 0 ? liveFeedback[0] : "Hold steady and breathe smoothly — great alignment!"}
               </span>
             </div>
-            <div className="text-[10px] sm:text-[11px] text-muted-foreground hidden xs:inline flex-shrink-0">
+            <div className="text-xs text-muted-foreground hidden sm:inline flex-shrink-0 font-semibold">
               Similarity: <span className="font-bold text-accent">{liveSimilarity}%</span>
             </div>
           </div>
 
           {/* Action Toolbar */}
-          <div className="flex flex-wrap items-center justify-between gap-1 sm:gap-1.5 p-1 sm:p-1.5 rounded-lg bg-card/60 border border-border/40">
+          <div className="flex flex-wrap items-center justify-between gap-2 p-2 sm:p-2.5 rounded-xl bg-card/60 border border-border/40">
             {/* Primary actions */}
-            <div className="flex items-center gap-1 sm:gap-1.5">
+            <div className="flex items-center gap-2">
               <Button
                 onClick={() => setCameraActive(true)}
                 disabled={cameraActive}
                 variant="default"
                 size="sm"
-                className="h-8 text-xs font-semibold px-2 sm:px-3"
+                className="h-9 sm:h-10 text-xs sm:text-sm font-semibold px-3 sm:px-4 shadow"
               >
-                <Play className="w-3.5 h-3.5 mr-1" />
-                <span>{cameraActive ? "Camera On" : "Camera"}</span>
+                <Play className="w-4 h-4 mr-1.5" />
+                <span>{cameraActive ? "Camera Active" : "Start Camera"}</span>
               </Button>
               <Button
                 onClick={handleBegin}
                 disabled={!cameraActive || isHolding || isCountingDown}
                 variant="default"
                 size="sm"
-                className="h-8 text-xs font-semibold px-2 sm:px-3"
+                className="h-9 sm:h-10 text-xs sm:text-sm font-semibold px-3.5 sm:px-5 shadow"
               >
-                {isCountingDown ? `Wait (${countdown})` : isHolding ? `Hold (${Math.round(holdProgress)}%)` : "Begin"}
+                {isCountingDown ? `Get Ready (${countdown})` : isHolding ? `Holding (${Math.round(holdProgress)}%)` : "Begin Pose"}
               </Button>
               <Button
                 onClick={resetLevel}
                 variant="outline"
                 size="sm"
-                className="h-8 text-xs px-2 sm:px-2.5"
+                className="h-9 sm:h-10 text-xs sm:text-sm px-3"
               >
-                <RotateCcw className="w-3.5 h-3.5 sm:mr-1" />
-                <span className="hidden xs:inline">Reset</span>
+                <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
+                <span>Reset</span>
               </Button>
               {currentLevel === challengeLevels.length - 1 ? (
                 <Button
                   onClick={handleCompleteChallenge}
                   variant="secondary"
                   size="sm"
-                  className="h-8 text-xs font-semibold px-2 sm:px-3"
+                  className="h-9 sm:h-10 text-xs sm:text-sm font-semibold px-3 sm:px-4"
                 >
-                  Finish
+                  Complete Challenge
                 </Button>
               ) : (
                 <Button
                   onClick={handleSkipLevel}
                   variant="ghost"
                   size="sm"
-                  className="h-8 text-xs px-1.5 sm:px-2"
+                  className="h-9 sm:h-10 text-xs sm:text-sm px-2.5"
                 >
-                  <SkipForward className="w-3.5 h-3.5 sm:mr-1" />
-                  <span className="hidden xs:inline">Skip</span>
+                  <SkipForward className="w-3.5 h-3.5 mr-1" />
+                  <span>Skip</span>
                 </Button>
               )}
             </div>
 
             {/* Assistance Toggles */}
-            <div className="flex items-center gap-0.5 sm:gap-1">
+            <div className="flex items-center gap-1.5">
               <Button
                 onClick={() => setShowPranayama(p => !p)}
                 variant="outline"
                 size="sm"
-                className="h-8 text-xs gap-1 sm:gap-1.5 px-2 sm:px-2.5"
+                className="h-9 sm:h-10 text-xs sm:text-sm gap-1.5 px-3"
                 title={showPranayama ? "Hide Pranayama Guide" : "Show Pranayama Breath Guide"}
               >
-                <Wind className={`w-3.5 h-3.5 ${showPranayama ? "text-cyan-400" : "text-muted-foreground"}`} />
+                <Wind className={`w-4 h-4 ${showPranayama ? "text-cyan-400" : "text-muted-foreground"}`} />
                 <span className="hidden sm:inline">{showPranayama ? "Breath: On" : "Breath"}</span>
               </Button>
               <Button
                 onClick={() => setVoiceCommandsEnabled(p => !p)}
                 variant="ghost"
                 size="sm"
-                className="h-8 text-xs gap-1 px-1.5 sm:px-2"
+                className="h-9 sm:h-10 text-xs sm:text-sm gap-1.5 px-2.5"
                 title={voiceCommandsEnabled ? "Mute Voice Commands" : "Enable Voice Commands"}
               >
                 {voiceCommandsEnabled ? (
                   <>
-                    <Mic className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+                    <Mic className="w-4 h-4 text-emerald-400 animate-pulse" />
                     <span className="hidden sm:inline">Mic On</span>
                   </>
                 ) : (
                   <>
-                    <MicOff className="w-3.5 h-3.5 text-muted-foreground" />
+                    <MicOff className="w-4 h-4 text-muted-foreground" />
                     <span className="hidden sm:inline">Mic Off</span>
                   </>
                 )}
@@ -1095,17 +1121,17 @@ const safePauseAudio = useCallback(() => {
                 onClick={() => setVoiceCoachEnabled(p => !p)}
                 variant="ghost"
                 size="sm"
-                className="h-8 text-xs gap-1 px-1.5 sm:px-2"
+                className="h-9 sm:h-10 text-xs sm:text-sm gap-1.5 px-2.5"
                 title={voiceCoachEnabled ? "Mute Voice Coach" : "Enable Voice Coach"}
               >
                 {voiceCoachEnabled ? (
                   <>
-                    <Volume2 className="w-3.5 h-3.5 text-emerald-500" />
+                    <Volume2 className="w-4 h-4 text-emerald-500" />
                     <span className="hidden sm:inline">Voice On</span>
                   </>
                 ) : (
                   <>
-                    <VolumeX className="w-3.5 h-3.5 text-muted-foreground" />
+                    <VolumeX className="w-4 h-4 text-muted-foreground" />
                     <span className="hidden sm:inline">Voice Off</span>
                   </>
                 )}
