@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -17,7 +18,7 @@ import {
 } from "@/utils/scoring";
 import { stabilityScore } from "@/utils/angles";
 import { NormalizedLandmark } from "@mediapipe/tasks-vision";
-import { Play, RotateCcw, SkipForward, Volume2, VolumeX, Mic, MicOff, Wind, Sparkles } from "lucide-react";
+import { Play, RotateCcw, SkipForward, Volume2, VolumeX, Mic, MicOff, Wind, Sparkles, CheckCircle2 } from "lucide-react";
 import { PranayamaGuide } from "./PranayamaGuide";
 import { useVoiceCommands } from "@/hooks/useVoiceCommands";
 import LevelCompleteOverlay from "./LevelCompleteOverlay";
@@ -115,6 +116,18 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
   const [voiceCommandsEnabled, setVoiceCommandsEnabled] = useState(true);
   const [voiceToast, setVoiceToast] = useState<string | null>(null);
   const [isMusicMuted, setIsMusicMuted] = useState(false);
+  interface ActiveCorrection {
+    originalHint: string;
+    shortMessage: string;
+    isCorrected: boolean;
+  }
+  const [activeCorrection, setActiveCorrection] = useState<ActiveCorrection | null>(null);
+  const activeCorrectionRef = useRef<ActiveCorrection | null>(null);
+  const correctionDismissTimerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    activeCorrectionRef.current = activeCorrection;
+  }, [activeCorrection]);
   const voiceToastTimerRef = useRef<number | null>(null);
 
   const showVoiceToast = useCallback((msg: string) => {
@@ -297,6 +310,11 @@ const safePauseAudio = useCallback(() => {
     startTimeRef.current = 0;
     motivationPlayedRef.current = false;
     lastHintSpokenTimeRef.current = 0;
+    if (correctionDismissTimerRef.current) {
+      window.clearTimeout(correctionDismissTimerRef.current);
+      correctionDismissTimerRef.current = null;
+    }
+    setActiveCorrection(null);
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
@@ -796,6 +814,61 @@ const safePauseAudio = useCallback(() => {
             <div className="absolute bottom-3 right-2.5 z-20 px-2 py-0.5 rounded bg-black/70 backdrop-blur-md text-[10px] font-bold text-accent">
               {liveSimilarity}% Match
             </div>
+            {/* Live AI Form Adjustment Pop-Up Box (Bottom-Right Corner) */}
+            <AnimatePresence>
+              {activeCorrection && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.85, y: 15 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.85, y: 15 }}
+                  transition={{ type: "spring", stiffness: 350, damping: 25 }}
+                  className={`absolute bottom-3 right-3 z-40 max-w-[210px] sm:max-w-[250px] p-2.5 rounded-xl border backdrop-blur-xl shadow-2xl transition-all duration-300 ${
+                    activeCorrection.isCorrected
+                      ? "bg-emerald-950/95 border-emerald-400/90 text-emerald-200 shadow-emerald-900/50"
+                      : "bg-slate-950/95 border-amber-500/90 text-amber-200 shadow-amber-950/60"
+                  }`}
+                >
+                  {/* Header row */}
+                  <div className="flex items-center justify-between pb-1 mb-1 border-b border-white/10">
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider">
+                      {activeCorrection.isCorrected ? (
+                        <>
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 animate-bounce" />
+                          <span className="text-emerald-400">Form Corrected!</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-amber-500" />
+                          </span>
+                          <span className="text-amber-400">Live AI Adjustment</span>
+                        </>
+                      )}
+                    </div>
+                    {!activeCorrection.isCorrected && (
+                      <span className="text-[10px] font-mono font-bold text-amber-300">
+                        {liveSimilarity}%
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Shortened correction message */}
+                  <div className="text-xs sm:text-sm font-extrabold text-white tracking-tight leading-snug">
+                    {activeCorrection.isCorrected
+                      ? "Posture Locked! Hold Steady!"
+                      : activeCorrection.shortMessage}
+                  </div>
+
+                  {/* Subtitle cue */}
+                  <div className="text-[10px] mt-1 text-white/70">
+                    {activeCorrection.isCorrected
+                      ? "Closing guidance box..."
+                      : "Adjust now to lock in score"}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Right: Yoga Pose Reference Screen */}

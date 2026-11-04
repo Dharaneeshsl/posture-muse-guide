@@ -259,3 +259,50 @@ export function computeSymmetry(userAngles: PoseAngles, targetAngles?: PoseAngle
   
   return count > 0 ? Math.round((totalSymmetry / count) * 100) : 0;
 }
+
+
+/**
+ * Shorten an English guidance hint for quick real-time pop-up notification
+ */
+export function shortenCorrection(hint: string): string {
+  if (!hint) return "";
+  const lower = hint.toLowerCase();
+
+  if (lower.includes("deepen the bend in your")) {
+    return hint.replace(/deepen the bend in your/i, "Bend").replace(/knee/i, "knee deeper").trim();
+  }
+  if (lower.includes("bend your") && lower.includes("little more")) {
+    return hint.replace(/bend your/i, "Bend").replace(/a little more/i, "more").trim();
+  }
+  if (lower.includes("straighten your") && lower.includes("engage")) {
+    return hint.replace(/straighten your/i, "Straighten").replace(/and engage.*$/i, "").trim();
+  }
+  if (lower.includes("straighten and extend your")) {
+    return hint.replace(/straighten and extend your/i, "Straighten").replace(/fully/i, "").trim();
+  }
+  if (lower.includes("raise your") && lower.includes("higher")) {
+    return hint.replace(/raise your/i, "Raise").replace(/higher.*$/i, "higher").trim();
+  }
+  if (lower.includes("lower your") && lower.includes("relax")) {
+    return hint.replace(/lower your/i, "Lower").replace(/and relax.*$/i, "").trim();
+  }
+  if (lower.includes("lift your torso upright")) {
+    return "Lift torso upright";
+  }
+  if (lower.includes("hinge deeper at your hips")) {
+    return "Hinge deeper at hips";
+  }
+  if (lower.includes("stand taller")) {
+    return "Stand taller";
+  }
+  if (lower.includes("sink your hips")) {
+    return "Sink hips lower";
+  }
+  if (lower.includes("clearly visible")) {
+    return "Step into frame";
+  }
+
+  const words = hint.split(" ");
+  if (words.length <= 4) return hint;
+  return words.slice(0, 4).join(" ");
+}
