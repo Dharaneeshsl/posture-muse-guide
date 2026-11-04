@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Trophy, Home } from "lucide-react";
+import { Trophy, Home, Download, FileText, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { jsPDF } from "jspdf";
 import { generateReportCanvas } from "@/lib/reportGenerator";
@@ -11,14 +11,12 @@ import { GeminiAudioDebrief } from "./GeminiAudioDebrief";
 interface FinalSummaryProps {
   levelScores: number[];
   levelFeedbacks?: string[][];
-  // Accept level details to show info for each level (name, slug, difficulty, thumbnail, tips)
   levelDetails?: Array<{ level: number; slug: string; name: string; difficulty: string }>;
   poseLibrary?: Array<PoseBenefitItem>;
   onGoHome: () => void;
 }
 
 export function FinalSummary({ levelScores, levelFeedbacks, levelDetails, poseLibrary, onGoHome }: FinalSummaryProps) {
-  // levelFeedbacks might be passed in; if not, default to empty arrays
   const feedbacks = levelFeedbacks || Array(levelScores.length).fill([]);
   const totalScore = Math.round(
     levelScores.reduce((sum, score) => sum + score, 0) / levelScores.length
@@ -29,7 +27,7 @@ export function FinalSummary({ levelScores, levelFeedbacks, levelDetails, poseLi
       grade: "Super Human",
       label: "🌟 Pose Master",
       message: "You nailed it! Strength, control, and grace — beautifully done.",
-      color: "text-success"
+      color: "text-emerald-500"
     };
     if (score >= 70) return {
       grade: "Great",
@@ -59,10 +57,6 @@ export function FinalSummary({ levelScores, levelFeedbacks, levelDetails, poseLi
 
   const feedback = getFeedback(totalScore);
 
-  
-
-  // JPG download removed — using PDF and JSON exports to avoid CORS/tainted-canvas issues
-
   const downloadJpgReport = async () => {
     try {
       const canvas = await generateReportCanvas(levelScores, feedbacks, levelDetails, poseLibrary, totalScore);
@@ -70,7 +64,6 @@ export function FinalSummary({ levelScores, levelFeedbacks, levelDetails, poseLi
 
       canvas.toBlob((blob) => {
         if (!blob) {
-          // fallback to JSON download if image export fails
           const report = {
             timestamp: new Date().toISOString(),
             totalScore: totalScore,
@@ -98,7 +91,6 @@ export function FinalSummary({ levelScores, levelFeedbacks, levelDetails, poseLi
       }, "image/jpeg", 0.92);
     } catch (err) {
       console.error("JPG report generation failed, falling back to JSON:", err);
-      // fallback to JSON
       const report = {
         timestamp: new Date().toISOString(),
         totalScore: totalScore,
@@ -114,6 +106,7 @@ export function FinalSummary({ levelScores, levelFeedbacks, levelDetails, poseLi
       URL.revokeObjectURL(url);
     }
   };
+
   const downloadPdfReport = async () => {
     try {
       const canvas = await generateReportCanvas(levelScores, feedbacks, levelDetails, poseLibrary, totalScore);
@@ -129,10 +122,8 @@ export function FinalSummary({ levelScores, levelFeedbacks, levelDetails, poseLi
       const imgPdfHeight = imgProps.height * ratio;
 
       if (imgPdfHeight <= pdfHeight) {
-        // Single page
         pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, imgPdfHeight);
       } else {
-        // Multiple pages: slice canvas
         let remainingHeight = imgProps.height;
         let sourceY = 0;
         const pageCanvas = document.createElement('canvas');
@@ -165,146 +156,144 @@ export function FinalSummary({ levelScores, levelFeedbacks, levelDetails, poseLi
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="max-w-4xl mx-auto space-y-6"
+      transition={{ duration: 0.4 }}
+      className="w-full max-w-5xl mx-auto h-full max-h-[calc(100vh-3.5rem)] flex flex-col justify-between overflow-hidden p-2 sm:p-3 gap-2 select-none"
     >
-      {/* Header */}
-      <div className="text-center space-y-3">
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-        >
-          <Trophy className="w-20 h-20 mx-auto text-success" />
-        </motion.div>
-        <h2 className="text-4xl font-bold text-foreground">Challenge Complete!</h2>
-        <p className="text-lg text-muted-foreground">Here's how you performed across all levels</p>
+      {/* Header Bar */}
+      <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-card/75 border border-border/60 backdrop-blur-md shadow-sm flex-shrink-0">
+        <div className="flex items-center gap-2 min-w-0">
+          <Trophy className="w-6 h-6 text-amber-400 flex-shrink-0" />
+          <div className="min-w-0">
+            <h2 className="text-sm sm:text-base font-bold leading-tight truncate">
+              Challenge Complete!
+            </h2>
+            <p className="text-[11px] text-muted-foreground">{feedback.message}</p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <div className="px-2.5 py-0.5 rounded-lg bg-secondary text-foreground text-xs font-bold flex items-center gap-1.5">
+            <span>Score:</span>
+            <span className={`text-lg font-black ${feedback.color}`}>{totalScore}%</span>
+            <Badge variant="outline" className="text-[10px] hidden sm:inline-flex">{feedback.label}</Badge>
+          </div>
+          <Button
+            size="sm"
+            onClick={onGoHome}
+            variant="secondary"
+            className="h-8 text-xs font-semibold px-3"
+          >
+            <Home className="w-3.5 h-3.5 mr-1" />
+            Home
+          </Button>
+        </div>
       </div>
 
-      {/* Overall Score Card */}
-      <Card className="text-center">
-        <CardHeader>
-          <CardTitle>Total Score</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.3, type: "spring" }}
-          >
-            <div className={`text-7xl font-bold ${feedback.color}`}>
-              {totalScore}
-            </div>
-            <div className="text-2xl font-semibold text-foreground mt-2">
-              {feedback.label}
-            </div>
-          </motion.div>
-
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            {feedback.message}
-          </p>
-        </CardContent>
-      </Card>
-
-      {/* AI Coach Audio Debrief (Powered by Gemini API) */}
-      <GeminiAudioDebrief
-        metrics={{
-          totalScore,
-          levelScores,
-          feedbacks,
-          levelDetails
-        }}
-      />
-
-      {/* Level Breakdown */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Level Breakdown</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className={`grid gap-4 ${levelScores.length === 1 ? "grid-cols-1 max-w-xs mx-auto" : "grid-cols-2 sm:grid-cols-3 md:grid-cols-5"}`}>
-
-            {levelScores.map((score, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 + idx * 0.1 }}
-                className="text-center space-y-2"
-              >
-                <div className="text-sm text-muted-foreground font-semibold">
-                  Level {idx + 1}
-                </div>
-                <Badge
-                  variant={score === 0 ? "secondary" : "default"}
-                  className="text-2xl px-4 py-2 w-full justify-center"
-                >
-                  {score === 0 ? "—" : `${score}%`}
-                </Badge>
-                {score === 0 && (
-                  <div className="text-xs text-muted-foreground">Skipped</div>
-                )}
-                {feedbacks[idx] && feedbacks[idx].length > 0 && (
-                  <div className="mt-2 text-xs text-muted-foreground text-left">
-                    <div className="font-semibold">Tips:</div>
-                    <ul className="list-disc list-inside space-y-1">
-                      {feedbacks[idx].map((f, i) => (
-                        <li key={i}>{f}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </motion.div>
-            ))}
+      {/* 2-Column Dashboard Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 flex-1 min-h-0 items-stretch overflow-hidden">
+        {/* Left Column: AI Coach Audio Debrief & Health Benefits */}
+        <div className="flex flex-col gap-2 h-full overflow-y-auto">
+          {/* AI Coach Audio Debrief */}
+          <div className="flex-1 min-h-0">
+            <GeminiAudioDebrief
+              metrics={{
+                totalScore,
+                levelScores,
+                feedbacks,
+                levelDetails
+              }}
+              className="h-full"
+            />
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Show benefits for first level's pose if available */}
-      {levelDetails && levelDetails.length > 0 && (
-        <div>
-          <BenefitsCard poseSlug={levelDetails[0].slug} poseLibrary={poseLibrary} />
+          {/* Health Benefits Card */}
+          {levelDetails && levelDetails.length > 0 && (
+            <div className="flex-shrink-0">
+              <BenefitsCard poseSlug={levelDetails[0].slug} poseLibrary={poseLibrary} />
+            </div>
+          )}
         </div>
-      )}
 
-      {/* Action Button */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.9 }}
-        className="flex justify-center"
-      >
-        <div className="flex flex-wrap gap-3 justify-center">
-          <Button
-            onClick={() => downloadJpgReport()}
-            size="lg"
-            className="gap-2 transition-transform hover:scale-105"
-          >
-            Download Results (JPG)
-          </Button>
+        {/* Right Column: Level Breakdown Cards (Levels 1 to 5) */}
+        <div className="flex flex-col gap-2 h-full overflow-y-auto">
+          <Card className="p-3 bg-card/70 border-border/60 shadow-sm flex-1 min-h-0 overflow-y-auto flex flex-col">
+            <CardHeader className="p-0 pb-1.5 flex flex-row items-center justify-between border-b border-border/40">
+              <CardTitle className="text-xs font-bold flex items-center gap-1.5 text-foreground">
+                <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                Level Performance Breakdown
+              </CardTitle>
+              <span className="text-[10px] text-muted-foreground">{levelScores.length} Postures Evaluated</span>
+            </CardHeader>
+            <CardContent className="p-0 flex-1 overflow-y-auto pt-2 space-y-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {levelScores.map((score, idx) => {
+                  const detail = levelDetails?.[idx];
+                  const tips = feedbacks[idx] || [];
+                  return (
+                    <div
+                      key={idx}
+                      className="p-2.5 rounded-lg bg-card/90 border border-border/50 text-left space-y-1 shadow-sm"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-foreground">
+                          Lvl {idx + 1}: {detail?.name || `Pose ${idx + 1}`}
+                        </span>
+                        <Badge
+                          variant={score === 0 ? "secondary" : "default"}
+                          className="text-xs font-extrabold px-2 py-0.2"
+                        >
+                          {score === 0 ? "Skipped" : `${score}%`}
+                        </Badge>
+                      </div>
 
-          <Button
-            onClick={() => downloadPdfReport()}
-            size="lg"
-            variant="outline"
-            className="gap-2 transition-transform hover:scale-105"
-          >
-            Download Results (PDF)
-          </Button>
-
-          <Button
-            onClick={onGoHome}
-            size="lg"
-            variant="secondary"
-            className="gap-2"
-          >
-            <Home className="w-5 h-5" />
-            Go to Home Page
-          </Button>
+                      {tips.length > 0 && (
+                        <div className="text-[11px] text-muted-foreground pt-0.5">
+                          <span className="font-semibold text-foreground/80">Tip: </span>
+                          <span className="line-clamp-2">{tips[0]}</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
         </div>
-      </motion.div>
+      </div>
+
+      {/* Bottom Action Footer */}
+      <div className="flex items-center justify-center gap-2 flex-shrink-0 pt-0.5">
+        <Button
+          onClick={() => downloadJpgReport()}
+          size="sm"
+          className="h-8 text-xs gap-1.5 px-3 font-semibold"
+        >
+          <Download className="w-3.5 h-3.5" />
+          Download JPG
+        </Button>
+
+        <Button
+          onClick={() => downloadPdfReport()}
+          size="sm"
+          variant="outline"
+          className="h-8 text-xs gap-1.5 px-3 font-semibold"
+        >
+          <FileText className="w-3.5 h-3.5" />
+          Download PDF
+        </Button>
+
+        <Button
+          onClick={onGoHome}
+          size="sm"
+          variant="secondary"
+          className="h-8 text-xs gap-1.5 px-4 font-semibold"
+        >
+          <Home className="w-3.5 h-3.5" />
+          Home
+        </Button>
+      </div>
     </motion.div>
   );
 }

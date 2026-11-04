@@ -89,7 +89,7 @@ const Index = () => {
 
   if (view === "landing") {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20 flex items-center justify-center p-4 relative">
+      <div className="h-screen max-h-screen overflow-hidden bg-gradient-to-b from-background to-secondary/20 flex flex-col items-center justify-center p-3 sm:p-6 relative">
         <div className="absolute top-6 right-6">
           <Button
             variant="outline"
@@ -105,10 +105,10 @@ const Index = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="max-w-3xl w-full text-center space-y-8"
+          className="max-w-3xl w-full text-center space-y-4 sm:space-y-6"
         >
           {/* Hero Section */}
-          <div className="space-y-6">
+          <div className="space-y-3 sm:space-y-4">
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -120,7 +120,7 @@ const Index = () => {
                 <img
                   src="/1000130175-Picsart-AiImageEnhancer.png"
                   alt="Pose Perfect Logo"
-                  className="relative w-32 h-32 md:w-36 md:h-36 object-contain rounded-3xl shadow-xl border border-emerald-500/20 bg-card/80 backdrop-blur-md p-2 transition-transform duration-300 group-hover:scale-105"
+                  className="relative w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 object-contain rounded-2xl shadow-xl border border-emerald-500/20 bg-card/80 backdrop-blur-md p-1.5 transition-transform duration-300 group-hover:scale-105"
                 />
               </div>
             </motion.div>
@@ -196,7 +196,7 @@ const Index = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7 }}
-            className="pt-8 space-y-3 text-sm text-muted-foreground"
+            className="pt-3 sm:pt-4 space-y-2 text-xs sm:text-sm text-muted-foreground"
           >
             <p className="flex items-center justify-center gap-2">
               ✓ Real-time skeletal overlay & 3D joint tracking
@@ -259,7 +259,7 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-x-hidden">
       {/* Header */}
       <header className="border-b bg-card/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">

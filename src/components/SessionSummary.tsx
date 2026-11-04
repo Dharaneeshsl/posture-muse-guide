@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, ArrowRight, Trophy } from "lucide-react";
+import { CheckCircle2, ArrowRight, Trophy, Sparkles, Activity, ShieldCheck, Heart } from "lucide-react";
 import { motion } from "framer-motion";
 import BenefitsCard, { PoseBenefitItem } from "./BenefitsCard";
 import { GeminiAudioDebrief } from "./GeminiAudioDebrief";
@@ -37,12 +37,12 @@ export function SessionSummary({
   poseLibrary,
   poseSlug
 }: SessionSummaryProps) {
-  const getGradeColor = (grade: string) => {
-    switch (grade) {
+  const getGradeColor = (g: string) => {
+    switch (g) {
       case "Advanced":
-        return "bg-success text-white";
+        return "bg-emerald-600 text-white";
       case "Intermediate":
-        return "bg-warning text-white";
+        return "bg-amber-500 text-white";
       default:
         return "bg-muted text-foreground";
     }
@@ -52,159 +52,145 @@ export function SessionSummary({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="max-w-3xl mx-auto space-y-6"
+      transition={{ duration: 0.4 }}
+      className="w-full max-w-5xl mx-auto h-full max-h-[calc(100vh-3.5rem)] flex flex-col justify-between overflow-hidden p-2 sm:p-3 gap-2 select-none"
     >
-      {/* Header */}
-      <div className="text-center space-y-3">
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-        >
-          <CheckCircle2 className="w-16 h-16 mx-auto text-success" />
-        </motion.div>
-        <h2 className="text-3xl font-bold text-foreground">Level {level} Complete!</h2>
-        <p className="text-lg text-muted-foreground">{poseName}</p>
-      </div>
+      {/* Compact Header Bar */}
+      <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-card/75 border border-border/60 backdrop-blur-md shadow-sm flex-shrink-0">
+        <div className="flex items-center gap-2 min-w-0">
+          <CheckCircle2 className="w-6 h-6 text-emerald-500 flex-shrink-0" />
+          <div className="min-w-0">
+            <h2 className="text-sm sm:text-base font-bold leading-tight truncate">
+              Level {level} Complete: {poseName}
+            </h2>
+            <p className="text-[11px] text-muted-foreground">Session Performance Breakdown</p>
+          </div>
+        </div>
 
-      {/* Grade Card */}
-      <Card className="text-center glass-card">
-        <CardHeader>
-          <CardTitle>Your Performance</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <Badge className={`text-2xl px-6 py-3 ${getGradeColor(grade)}`}>
+        <div className="flex items-center gap-2">
+          <Badge className={`text-xs px-2.5 py-0.5 font-bold ${getGradeColor(grade)}`}>
             {grade}
           </Badge>
-
-          {/* Metrics Grid */}
-          <div className="grid grid-cols-3 gap-4">
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="space-y-2"
-            >
-              <div className="text-3xl font-bold text-accent">{accuracy}%</div>
-              <div className="text-sm text-muted-foreground">Accuracy</div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="space-y-2"
-            >
-              <div className="text-3xl font-bold text-accent">{stability}%</div>
-              <div className="text-sm text-muted-foreground">Stability</div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-              className="space-y-2"
-            >
-              <div className="text-3xl font-bold text-accent">{symmetry}%</div>
-              <div className="text-sm text-muted-foreground">Symmetry</div>
-            </motion.div>
+          <div className="px-2.5 py-0.5 rounded-lg bg-secondary text-foreground text-xs font-bold">
+            Score: <span className="text-emerald-500 font-extrabold text-sm ml-1">{calculatedOverall}%</span>
           </div>
-        </CardContent>
-      </Card>
+          <Button
+            size="sm"
+            onClick={onNextLevel}
+            className="h-8 text-xs font-semibold px-3 shadow"
+          >
+            {isLastLevel ? (
+              <>
+                <Trophy className="w-3.5 h-3.5 mr-1 text-amber-300" />
+                View Final Summary
+              </>
+            ) : (
+              <>
+                Next Level
+                <ArrowRight className="w-3.5 h-3.5 ml-1" />
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
 
-      {/* Overall Score Card */}
-      <Card className="text-center">
-        <CardHeader>
-          <CardTitle>Overall Score</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-5xl font-bold text-accent">{calculatedOverall}%</div>
-          <div className="text-sm text-muted-foreground mt-2">Calculated from accuracy, stability, and symmetry</div>
-        </CardContent>
-      </Card>
+      {/* 2-Column Balanced Dashboard */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 flex-1 min-h-0 items-stretch overflow-hidden">
+        {/* Left Column: Performance Metrics & AI Coach Audio Debrief */}
+        <div className="flex flex-col gap-2 h-full overflow-y-auto">
+          {/* 3 Metric Stat Tiles */}
+          <div className="grid grid-cols-3 gap-2">
+            <Card className="p-2.5 text-center bg-card/70 border-border/60 shadow-sm flex flex-col items-center justify-center">
+              <Activity className="w-4 h-4 text-emerald-500 mb-0.5" />
+              <div className="text-xl font-black text-emerald-500">{accuracy}%</div>
+              <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Accuracy</div>
+            </Card>
 
-      {/* AI Coach Audio Debrief for completed pose */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.52 }}
-      >
-        <GeminiAudioDebrief
-          metrics={{
-            totalScore: calculatedOverall,
-            levelScores: [calculatedOverall],
-            feedbacks: [feedback],
-            levelDetails: [{ level, slug: poseSlug || "", name: poseName, difficulty: grade }]
-          }}
-        />
-      </motion.div>
+            <Card className="p-2.5 text-center bg-card/70 border-border/60 shadow-sm flex flex-col items-center justify-center">
+              <ShieldCheck className="w-4 h-4 text-cyan-500 mb-0.5" />
+              <div className="text-xl font-black text-cyan-500">{stability}%</div>
+              <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Stability</div>
+            </Card>
 
-      {/* Benefits Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.55 }}
-      >
-        <BenefitsCard pose={pose} poseSlug={poseSlug} poseLibrary={poseLibrary} />
-      </motion.div>
+            <Card className="p-2.5 text-center bg-card/70 border-border/60 shadow-sm flex flex-col items-center justify-center">
+              <Heart className="w-4 h-4 text-purple-500 mb-0.5" />
+              <div className="text-xl font-black text-purple-500">{symmetry}%</div>
+              <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Symmetry</div>
+            </Card>
+          </div>
 
-      {/* Feedback Card */}
-      {feedback.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-        >
-          <Card>
-            <CardHeader>
-              <CardTitle>Improvement Tips</CardTitle>
+          {/* AI Coach Audio Debrief (Gemini) */}
+          <div className="flex-1 min-h-0">
+            <GeminiAudioDebrief
+              metrics={{
+                totalScore: calculatedOverall,
+                levelScores: [calculatedOverall],
+                feedbacks: [feedback],
+                levelDetails: [{ level, slug: poseSlug || "", name: poseName, difficulty: grade }]
+              }}
+              className="h-full"
+            />
+          </div>
+        </div>
+
+        {/* Right Column: Improvement Tips & Pose Benefits */}
+        <div className="flex flex-col gap-2 h-full overflow-y-auto">
+          {/* Improvement Tips Card */}
+          <Card className="p-3 bg-card/70 border-border/60 shadow-sm flex-1 min-h-0 overflow-y-auto flex flex-col">
+            <CardHeader className="p-0 pb-1.5 flex flex-row items-center justify-between">
+              <CardTitle className="text-xs font-bold flex items-center gap-1.5 text-foreground">
+                <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                Improvement Tips
+              </CardTitle>
+              <span className="text-[10px] text-muted-foreground">Biomechanics Coaching</span>
             </CardHeader>
-            <CardContent>
-              <ul className="space-y-2">
-                {feedback.map((tip, idx) => (
-                  <li key={idx} className="flex items-start gap-2 text-sm text-muted-foreground">
-                    <span className="text-accent mt-1">•</span>
-                    <span>{tip}</span>
-                  </li>
-                ))}
-              </ul>
+            <CardContent className="p-0 flex-1 overflow-y-auto pt-1">
+              {feedback.length === 0 ? (
+                <div className="italic text-xs text-muted-foreground py-2">
+                  Outstanding posture! All joint angles matched target alignment.
+                </div>
+              ) : (
+                <ul className="space-y-1.5">
+                  {feedback.map((tip, idx) => (
+                    <li key={idx} className="flex items-start gap-2 text-xs text-foreground/90 leading-snug">
+                      <span className="text-emerald-500 font-bold">•</span>
+                      <span>{tip}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </CardContent>
           </Card>
-        </motion.div>
-      )}
 
-      {/* Action Button */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.7 }}
-        className="flex justify-center"
-      >
-        {isLastLevel ? (
-          <div className="flex gap-3">
-            <Button
-              size="lg"
-              onClick={onNextLevel}
-              className="text-lg px-8 py-6"
-            >
-              <Trophy className="w-5 h-5 mr-2" />
-              View Final Summary
-            </Button>
+          {/* Benefits Card */}
+          <div className="flex-shrink-0">
+            <BenefitsCard pose={pose} poseSlug={poseSlug} poseLibrary={poseLibrary} />
           </div>
-        ) : (
-          <Button
-            size="lg"
-            onClick={onNextLevel}
-            className="text-lg px-8 py-6"
-          >
-            Next Level
-            <ArrowRight className="w-5 h-5 ml-2" />
-          </Button>
-        )}
-      </motion.div>
+        </div>
+      </div>
+
+      {/* Bottom Action Footer */}
+      <div className="flex justify-center flex-shrink-0 pt-0.5">
+        <Button
+          size="sm"
+          onClick={onNextLevel}
+          className="text-xs px-6 py-2 h-9 font-semibold shadow-md gap-1.5"
+        >
+          {isLastLevel ? (
+            <>
+              <Trophy className="w-4 h-4 text-amber-300" />
+              View Final Summary
+            </>
+          ) : (
+            <>
+              Proceed to Next Level
+              <ArrowRight className="w-4 h-4 ml-1" />
+            </>
+          )}
+        </Button>
+      </div>
     </motion.div>
   );
 }
