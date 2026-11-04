@@ -284,7 +284,7 @@ const Index = () => {
             >
               {theme === "light" ? <Moon className="w-4 h-4 text-slate-700" /> : <Sun className="w-4 h-4 text-amber-400" />}
             </Button>
-            <Button variant="outline" onClick={() => setView("challenge")}>
+            <Button variant="outline" onClick={() => { setSelectedPose(null); setView("challenge"); }}>
               <Trophy className="w-4 h-4 mr-2" />
               Challenge
             </Button>

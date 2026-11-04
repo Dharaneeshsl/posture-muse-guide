@@ -265,7 +265,7 @@ export function FinalSummary({ levelScores, levelFeedbacks, levelDetails, poseLi
         transition={{ delay: 0.9 }}
         className="flex justify-center"
       >
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3 justify-center">
           <Button
             onClick={() => downloadJpgReport()}
             size="lg"
@@ -274,11 +274,19 @@ export function FinalSummary({ levelScores, levelFeedbacks, levelDetails, poseLi
             Download Results (JPG)
           </Button>
 
-          {/* JPG download removed */}
+          <Button
+            onClick={() => downloadPdfReport()}
+            size="lg"
+            variant="outline"
+            className="gap-2 transition-transform hover:scale-105"
+          >
+            Download Results (PDF)
+          </Button>
 
           <Button
             onClick={onGoHome}
             size="lg"
+            variant="secondary"
             className="gap-2"
           >
             <Home className="w-5 h-5" />

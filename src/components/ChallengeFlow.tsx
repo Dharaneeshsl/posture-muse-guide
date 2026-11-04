@@ -129,6 +129,8 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
   const [liveAnglesAvg, setLiveAnglesAvg] = useState<Record<string, number>>({});
   const perSecondIntervalRef = useRef<number | null>(null);
   const startTimeRef = useRef<number>(0);
+  const isCompletingRef = useRef(false);
+  const audioPlayPromiseRef = useRef<Promise<void> | null>(null);
   const completeLevelRef = useRef<() => void>(() => {});
   const [sessionData, setSessionData] = useState<{
     accuracy: number;
@@ -142,7 +144,41 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
   const currentPose = poseLibrary.find(p => p.slug === challengeLevels[currentLevel]?.slug);
   const holdDuration = currentPose?.hold_seconds || 10;
 
+  const safePlayAudio = useCallback(() => {
+    if (!audioRef.current) return;
+    try {
+      audioPlayPromiseRef.current = audioRef.current.play();
+      audioPlayPromiseRef.current.catch((e) => {
+        console.warn("Audio play prevented:", e);
+      });
+    } catch (e) {
+      console.warn("Audio play exception:", e);
+    }
+  }, []);
+
+  const safePauseAudio = useCallback(() => {
+    if (!audioRef.current) return;
+    const audio = audioRef.current;
+    if (audioPlayPromiseRef.current) {
+      audioPlayPromiseRef.current
+        .then(() => {
+          audio.pause();
+          audio.currentTime = 0;
+        })
+        .catch(() => {});
+    } else {
+      try {
+        audio.pause();
+        audio.currentTime = 0;
+      } catch {
+        /* ignore */
+      }
+    }
+  }, []);
+
   const resetLevel = useCallback(() => {
+    isCompletingRef.current = false;
+    safePauseAudio();
     setIsHolding(false);
     motivationPlayedRef.current = false;
     setCountdown(3);
@@ -156,7 +192,7 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
       window.speechSynthesis.cancel();
     }
-  }, []);
+  }, [safePauseAudio]);
 
   const handleBegin = useCallback(() => {
     if (!cameraActive) return;
@@ -186,17 +222,10 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
           speakVoice("Hold!", true);
         }
         // Start background music when the hold begins
-        try {
-          audioRef.current?.play().catch((e) => {
-            // Play may be blocked if not a user gesture; Begin is a user gesture so usually OK
-            console.warn("Audio play failed:", e);
-          });
-        } catch (e) {
-          console.warn("Audio play exception:", e);
-        }
+        safePlayAudio();
       }
     }, 1000);
-  }, [cameraActive]);
+  }, [cameraActive, safePlayAudio]);
 
   const handlePoseDetected = useCallback((angles: Record<string, number>, _landmarks: NormalizedLandmark[]) => {
     if (!isHolding || !currentPose) return;
@@ -261,6 +290,27 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
       completeLevelRef.current();
     }
   }, [isHolding, currentPose, holdDuration]);
+
+
+  // Dedicated hold progress interval to guarantee smooth progress and completion even on frame drops
+  useEffect(() => {
+    if (!isHolding) return;
+
+    const interval = window.setInterval(() => {
+      if (startTimeRef.current === 0) return;
+      const elapsed = Date.now() - startTimeRef.current;
+      const progress = Math.min(100, (elapsed / (holdDuration * 1000)) * 100);
+      setHoldProgress(progress);
+
+      if (progress >= 100) {
+        completeLevelRef.current();
+      }
+    }, 100);
+
+    return () => {
+      window.clearInterval(interval);
+    };
+  }, [isHolding, holdDuration]);
 
   // Start per-second aggregator when holding starts and stop when it ends
   useEffect(() => {
@@ -334,7 +384,8 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
   }, []);
 
   const completeLevel = useCallback(() => {
-    if (!currentPose) return;
+    if (!currentPose || isCompletingRef.current) return;
+    isCompletingRef.current = true;
 
     setIsHolding(false);
     motivationPlayedRef.current = false;
@@ -377,15 +428,8 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
       speakVoice(`Great job! Pose complete! Grade: ${grade}`, true);
     }
     // Pause and reset music when the exercise completes
-    try {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-      }
-    } catch (e) {
-      /* ignore */
-    }
-  }, [currentPose]);
+    safePauseAudio();
+  }, [currentPose, safePauseAudio]);
   completeLevelRef.current = completeLevel;
 
   const handleNextLevel = useCallback(() => {
@@ -403,6 +447,8 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
       setLevelFeedbacks(newFeedbacks);
     }
 
+    isCompletingRef.current = false;
+    safePauseAudio();
     setShowSummary(false);
     resetLevel();
     
@@ -420,7 +466,7 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
       }
       setShowFinalSummary(true);
     }
-  }, [currentLevel, challengeLevels.length, resetLevel, sessionData, levelScores, levelFeedbacks]);
+  }, [currentLevel, challengeLevels.length, resetLevel, sessionData, levelScores, levelFeedbacks, safePauseAudio]);
 
   
 
@@ -433,6 +479,8 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
     newFeedbacks[currentLevel] = [];
     setLevelFeedbacks(newFeedbacks);
 
+    isCompletingRef.current = false;
+    safePauseAudio();
     resetLevel();
     if (currentLevel < challengeLevels.length - 1) {
       setCurrentLevel(prev => prev + 1);
@@ -447,7 +495,7 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
       }
       setShowFinalSummary(true);
     }
-  }, [currentLevel, challengeLevels.length, resetLevel, levelScores, levelFeedbacks]);
+  }, [currentLevel, challengeLevels.length, resetLevel, levelScores, levelFeedbacks, safePauseAudio]);
 
   const handleCompleteChallenge = useCallback(() => {
     // Save the current session data for this level (if any) and finish the entire challenge
@@ -472,6 +520,8 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
       setLevelFeedbacks(newFeedbacks);
     }
 
+    isCompletingRef.current = false;
+    safePauseAudio();
     resetLevel();
 
     try {
@@ -484,7 +534,7 @@ export function ChallengeFlow({ challengeLevels, poseLibrary, onComplete }: Chal
     }
 
     setShowFinalSummary(true);
-  }, [currentLevel, resetLevel, sessionData, levelScores, levelFeedbacks]);
+  }, [currentLevel, resetLevel, sessionData, levelScores, levelFeedbacks, safePauseAudio]);
 
   if (!currentPose) {
     return (
